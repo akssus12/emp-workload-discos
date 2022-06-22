@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #define MAX_UNIQUES 6000000
 
@@ -22,6 +24,9 @@ int cmp_count(const void* p1, const void* p2) {
 }
 
 int main(int argc, char** argv) {
+    // Used to find the file size
+    struct stat sb;
+
     struct timeval start,end;
     double totaltime;
     char filename[256];
@@ -39,6 +44,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    stat(argv[1], &sb);
+
     FILE *fp;
 
     fp = fopen(filename, "r");
@@ -46,68 +53,59 @@ int main(int argc, char** argv) {
         printf("Error opening data file\n");
     }
 
-    fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
-
-    printf("size : %ld\n", size+1);
-
+    char* word = malloc(sb.st_size+1);
+    memset(word, 0, sb.st_size+1);
+    word[sb.st_size+1] = '\0';
     //char word[101]; // 100-char word plus NUL byte
-    char* word = malloc(size + 1);
-    if(NULL == word) { 
-        printf("size exceed\n");
-        return 0;
+
+    //fscanf(fp,"%100s", word);
+    fread(word, sb.st_size+1, 1, fp);
+    word[sb.st_size+1] = '\0';
+    printf("sb.st_size : %lu\n", sb.st_size);
+    printf("word size : %lu\n", malloc_usable_size(word));
+    // Convert word to lower case in place.
+    for (char* p = word; *p; p++) {
+        *p = tolower(*p);
     }
-    memset(word, 0, size+1);
 
-    fseek(fp, 0, SEEK_SET);
+    char * token = strtok(word, " ");
 
-    while (!feof(fp)) {
-        //fscanf(fp,"%100s", word);
-        fread(word, size, 1, fp);
-        // Convert word to lower case in place.
-        for (char* p = word; *p; p++) {
-            *p = tolower(*p);
-        }
-
-        char * token = strtok(word, " ");
-
-        while( token != NULL ) {
-            // Search for word in hash table.
-            ENTRY item = {token, NULL};
-            ENTRY* found = hsearch(item, FIND);
-            if (found != NULL) {
-                // Word already in table, increment count.
-                int* pn = (int*)found->data;
-                (*pn)++;
-                token = strtok(NULL, " ");
-            } else {
-                // Word not in table, insert it with count 1.
-                item.key = strdup(token); // need to copy word
-                if (item.key == NULL) {
-                    fprintf(stderr, "out of memory in strdup\n");
-                    return 1;
-                }
-                int* pn = malloc(sizeof(int));
-                if (pn == NULL) {
-                    fprintf(stderr, "out of memory in malloc\n");
-                    return 1;
-                }
-                *pn = 1;
-                item.data = pn;
-                ENTRY* entered = hsearch(item, ENTER);
-                if (entered == NULL) {
-                    fprintf(stderr, "table full, increase MAX_UNIQUES\n");
-                    return 1;
-                }
-
-                // And add to words list for iterating.
-                words[num_words].word = item.key;
-                num_words++;
-                token = strtok(NULL, " ");
+    while( token != NULL ) {
+        // Search for word in hash table.
+        ENTRY item = {token, NULL};
+        ENTRY* found = hsearch(item, FIND);
+        if (found != NULL) {
+            // Word already in table, increment count.
+            int* pn = (int*)found->data;
+            (*pn)++;
+            token = strtok(NULL, " ");
+        } else {
+            // Word not in table, insert it with count 1.
+            item.key = strdup(token); // need to copy word
+            if (item.key == NULL) {
+                fprintf(stderr, "out of memory in strdup\n");
+                return 1;
             }
+            int* pn = malloc(sizeof(int));
+            if (pn == NULL) {
+                fprintf(stderr, "out of memory in malloc\n");
+                return 1;
+            }
+            *pn = 1;
+            item.data = pn;
+            ENTRY* entered = hsearch(item, ENTER);
+            if (entered == NULL) {
+                fprintf(stderr, "table full, increase MAX_UNIQUES\n");
+                return 1;
+            }
+
+            // And add to words list for iterating.
+            words[num_words].word = item.key;
+            num_words++;
+            token = strtok(NULL, " ");
         }
     }
-
+    
     // Iterate once to add counts to words list, then sort.
     for (int i = 0; i < num_words; i++) {
         ENTRY item = {words[i].word, NULL};
@@ -119,19 +117,19 @@ int main(int argc, char** argv) {
         words[i].count = *(int*)found->data;
     }
     qsort(&words[0], num_words, sizeof(count), cmp_count); 
-
     // Iterate again to print output.
-    for (int i = 0; i < num_words; i++) {
-        // printf("%s %d\n", words[i].word, words[i].count);
-    }
+    // for (int i = 0; i < num_words; i++) {
+    //     printf("%s %d\n", words[i].word, words[i].count);
+    // }
 
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
 
+    printf("total_words : %d\n", num_words);
     printf("\nTotaltime = %f seconds\n", totaltime);
 
     fclose(fp);
-    free(word);
+    free(words);
 
     return 0;
 }
