@@ -258,6 +258,7 @@ int main(int argc, char** argv) {
     }   
     fclose(fp);
     free(words);
+    free(word);
 
     MPI_Finalize();
 

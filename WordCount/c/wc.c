@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
     printf("\nTotaltime = %f seconds\n", totaltime);
 
     fclose(fp);
+    free(word);
     free(words);
 
     return 0;
