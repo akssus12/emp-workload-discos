@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#define MAX_UNIQUES 6000000
+#define MAX_UNIQUES 20000000
 #define Max_length 600
 
 typedef struct {
