@@ -139,11 +139,11 @@ int main(int argc, char** argv) {
             }
 
             // And add to words list for iterating.
-            words[num_words].word = item.key;
-            num_words++;
-            // strncpy(words[num_words].word, item.key, Max_length-1);
-            // words[num_words].word[Max_length] = '\0';
+            // words[num_words].word = item.key;
             // num_words++;
+            strncpy(words[num_words].word, item.key, Max_length-1);
+            words[num_words].word[Max_length] = '\0';
+            num_words++;
 
             token = strtok(NULL, " ");
         }
@@ -227,11 +227,11 @@ int main(int argc, char** argv) {
                 }
 
                 // And add to words list for iterating.
-                words[num_words].word = item.key;
-                num_words++;
-                // strncpy(words[num_words].word, item.key, Max_length-1);
-                // words[num_words].word[Max_length] = '\0';
+                // words[num_words].word = item.key;
                 // num_words++;
+                strncpy(words[num_words].word, item.key, Max_length-1);
+                words[num_words].word[Max_length] = '\0';
+                num_words++;
             }
         }    
 
