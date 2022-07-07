@@ -134,11 +134,11 @@ int main(int argc, char** argv) {
             }
 
             // And add to words list for iterating.
-            // words[num_words].word = item.key;
-            // num_words++;
-            strncpy(words[num_words].word, item.key, Max_length-1);
-            words[num_words].word[Max_length] = '\0';
+            words[num_words].word = item.key;
             num_words++;
+            // strncpy(words[num_words].word, item.key, Max_length-1);
+            // words[num_words].word[Max_length] = '\0';
+            // num_words++;
 
             token = strtok(NULL, " ");
         }
@@ -154,7 +154,6 @@ int main(int argc, char** argv) {
         }
         words[i].count = *(int*)found->data;
     }
-    qsort(&words[0], num_words, sizeof(count), cmp_count); 
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -223,11 +222,11 @@ int main(int argc, char** argv) {
                 }
 
                 // And add to words list for iterating.
-                // words[num_words].word = item.key;
-                // num_words++;
-                strncpy(words[num_words].word, item.key, Max_length-1);
-                words[num_words].word[Max_length] = '\0';
+                words[num_words].word = item.key;
                 num_words++;
+                // strncpy(words[num_words].word, item.key, Max_length-1);
+                // words[num_words].word[Max_length] = '\0';
+                // num_words++;
             }
         }    
 
