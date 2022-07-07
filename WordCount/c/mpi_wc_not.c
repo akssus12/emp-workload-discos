@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#define MAX_UNIQUES 6000000
+#define MAX_UNIQUES 20000000
 #define Max_length 600
 
 typedef struct {
@@ -67,6 +67,8 @@ int main(int argc, char** argv) {
     int total_words = 0;
     int received_num_words[2];
 
+    char limit_word[Max_length];
+
     // Allocate hash table.
     if (hcreate(MAX_UNIQUES) == 0) {
         fprintf(stderr, "error creating hash table\n");
@@ -105,6 +107,8 @@ int main(int argc, char** argv) {
 
     while( token != NULL ) {
         // Search for word in hash table.
+        strncpy(limit_word, token, Max_length-1);
+        limit_word[Max_length] = '\0';
 
         ENTRY item = {token, NULL};
         ENTRY* found = hsearch(item, FIND);
