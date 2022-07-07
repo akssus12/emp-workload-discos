@@ -67,6 +67,8 @@ int main(int argc, char** argv) {
     int total_words = 0;
     int received_num_words[2];
 
+    char limit_word[Max_length];
+
     // Allocate hash table.
     if (hcreate(MAX_UNIQUES) == 0) {
         fprintf(stderr, "error creating hash table\n");
@@ -105,6 +107,9 @@ int main(int argc, char** argv) {
 
     while( token != NULL ) {
         // Search for word in hash table.
+        strncpy(limit_word, token, Max_length-1);
+        limit_word[Max_length] = '\0';
+
         ENTRY item = {token, NULL};
         ENTRY* found = hsearch(item, FIND);
         if (found != NULL) {
@@ -115,7 +120,7 @@ int main(int argc, char** argv) {
             token = strtok(NULL, " ");
         } else {
             // Word not in table, insert it with count 1.
-            item.key = strdup(token); // need to copy word
+            item.key = strdup(limit_word); // need to copy word
             if (item.key == NULL) {
                 fprintf(stderr, "out of memory in strdup\n");
                 return 1;
