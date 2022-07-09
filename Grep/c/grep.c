@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
         *p = tolower(*p);
     }
 
-    start_string = end_string = word;
+    start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
         num_lines++;
