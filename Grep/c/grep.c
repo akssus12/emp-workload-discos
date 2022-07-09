@@ -53,14 +53,7 @@ int main(int argc, char** argv) {
     for (char* p = word; *p; p++) {
         *p = tolower(*p);
     }
-
-    while(!feof(fp)){
-        ch = fgetc(fp);
-        if(ch == '\n'){
-            num_lines++;
-        }
-    }
-
+    
     char * lines = strtok(word, '\n');
 
     while( lines != NULL ) {
