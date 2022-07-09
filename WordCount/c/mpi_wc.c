@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
             token = strtok(NULL, " ");
         } else {
             // Word not in table, insert it with count 1.
-            item.key = strdup(limit_word); // need to copy word
+            item.key = strdup(token); // need to copy word
             if (item.key == NULL) {
                 fprintf(stderr, "out of memory in strdup\n");
                 return 1;

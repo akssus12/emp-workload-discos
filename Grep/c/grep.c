@@ -66,12 +66,13 @@ int main(int argc, char** argv) {
     while( lines != NULL ) {
         num_lines++;
         char * token = strtok(lines, " ");
-        if(strcmp(token, target) == 0){
-
-        } else {
-            
+        while( token != NULL ){
+            if(strcmp(token, target) == 0){
+                printf("lines : %d\n", num_lines);
+            } 
+            token = strtok(NULL, " ");
         }
-        
+        lines = strtok(NULL, '\n');
     }
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
