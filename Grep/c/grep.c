@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
     char target[256];
     int ch = 0;
     int num_lines = 0;
+    char * start, end; // for strchr()
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
@@ -38,11 +39,6 @@ int main(int argc, char** argv) {
     memset(word, 0, sb.st_size+1);
     word[sb.st_size+1] = '\0';
 
-    char* word = malloc(sb.st_size+1);
-    memset(word, 0, sb.st_size+1);
-    word[sb.st_size+1] = '\0';
-    //char word[101]; // 100-char word plus NUL byte
-
     //fscanf(fp,"%100s", word);
     fread(word, sb.st_size+1, 1, fp);
     word[sb.st_size+1] = '\0';
@@ -53,19 +49,19 @@ int main(int argc, char** argv) {
     for (char* p = word; *p; p++) {
         *p = tolower(*p);
     }
-    
-    char * lines = strtok(word, '\n');
 
-    while( lines != NULL ) {
+    start = end = word;
+
+    while( (end = strchr(start, '\n')) ){
         num_lines++;
-        char * token = strtok(lines, " ");
+        char * token = strtok(start, " ");
         while( token != NULL ){
             if(strcmp(token, target) == 0){
                 printf("lines : %d\n", num_lines);
             } 
             token = strtok(NULL, " ");
         }
-        lines = strtok(NULL, '\n');
+        start = end + 1;
     }
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
