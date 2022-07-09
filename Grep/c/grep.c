@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     char target[256];
     int ch = 0;
     int num_lines = 0;
-    char * start, end; // for strchr()
+    char * start_string, end_string; // for strchr()
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
@@ -50,18 +50,18 @@ int main(int argc, char** argv) {
         *p = tolower(*p);
     }
 
-    start = end = word;
+    start_string = end_string = word;
 
-    while( (end = strchr(start, '\n')) ){
+    while( (end_string = strchr(start_string, '\n')) ){
         num_lines++;
-        char * token = strtok(start, " ");
+        char * token = strtok(start_string, " ");
         while( token != NULL ){
             if(strcmp(token, target) == 0){
                 printf("lines : %d\n", num_lines);
             } 
             token = strtok(NULL, " ");
         }
-        start = end + 1;
+        start_string = end_string + 1;
     }
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
