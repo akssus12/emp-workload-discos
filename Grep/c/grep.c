@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     char target[256];
     int ch = 0;
     int num_lines = 0;
-    char * start_string, end_string; // for strchr()
+    char * start_string, *end_string; // for strchr()
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
