@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <string.h>
+
 const char* sentences = "Hello, this is some sample text\n"
                         "This is the second sentence\n"
                         "\n"
@@ -28,6 +30,7 @@ void parse(const char* input){
       memset(string, 0, size+1);
       printf("string : %s\n", string);
       num_lines++;
+
       char * token = strtok(string, " ");
       while(token != NULL){
         if(strcmp(token, target) == 0){
