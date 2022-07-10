@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
     int ch = 0;
     int num_lines = 0;
     char * start_string, *end_string; // for strchr()
-    char * string;
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
@@ -56,7 +55,7 @@ int main(int argc, char** argv) {
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
         printf("error 1\n");
-        string = calloc(size_string, sizeof(char));
+        char *string = calloc(size_string, sizeof(char));
         printf("error 2\n");
         strncpy(string, start_string, size_string-1);
         printf("error 3\n");
