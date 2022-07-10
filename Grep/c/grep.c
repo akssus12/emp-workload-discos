@@ -63,11 +63,9 @@ int main(int argc, char** argv) {
         // strncpy(string, start_string, size_string);
         // string[size_string+1] = '\0';
         num_lines++;
-        printf("%s\n", string);
 
         char * token = strtok(string, " ");
         while( token != NULL ){
-            printf("%s\n", token);
             if(strcmp(token, target) == 0){
                 printf("lines : %d\n", num_lines);
             } 
