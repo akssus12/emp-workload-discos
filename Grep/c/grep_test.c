@@ -26,6 +26,7 @@ void parse(const char* input){
       string = (char *)malloc(sizeof(char) * size + 1);
       strncpy(string, start, size);
       memset(string, 0, size+1);
+      printf("string : %s\n", string);
       num_lines++;
       char * token = strtok(string, " ");
       while(token != NULL){
