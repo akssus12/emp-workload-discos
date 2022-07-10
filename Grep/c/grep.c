@@ -55,24 +55,36 @@ int main(int argc, char** argv) {
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
+        printf("error 1");
         string = calloc(size_string, sizeof(char));
+        printf("error 2");
         strncpy(string, start_string, size_string-1);
+        printf("error 3");
         string[size_string] = '\0';
+        printf("error 4");
         // int size_string = end_string - start_string;
         // string = (char *)malloc(sizeof(char) * size_string + 1);
         // memset(string, 0, sizeof(char) * size_string + 1);
         // strncpy(string, start_string, size_string);
         // string[size_string+1] = '\0';
         num_lines++;
+        printf("error 5");
         char * token = strtok(string, " ");
+        printf("error 6");
         while( token != NULL ){
+            printf("error 7");
             if(strcmp(token, target) == 0){
+                printf("error 8");
                 printf("lines : %d\n", num_lines);
             } 
+            printf("error 9");
             token = strtok(NULL, " ");
         }
+        printf("error 10");
         start_string = end_string + 1;
+        printf("error 11");
         free(string);
+        printf("error 12");
     }
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
