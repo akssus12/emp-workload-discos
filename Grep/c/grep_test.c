@@ -26,6 +26,7 @@ void parse(const char* input){
       printf("size : %d\n", size);
 
       string = (char *)malloc(sizeof(char) * size + 1);
+      memset(string, 0, size+1);
       strncpy(string, start, size);
       string[size+1] = '\0';
       printf("string : %s\n", string);
@@ -35,8 +36,6 @@ void parse(const char* input){
       while(token != NULL){
         if(strcmp(token, target) == 0){
             printf("lines : %d\n", num_lines);
-        } else {
-            printf("not this lines %d\n", num_lines);
         }
         token = strtok(NULL, " ");
       }
