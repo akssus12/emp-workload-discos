@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
         printf("error 2\n");
         strncpy(string, start_string, size_string-1);
         printf("error 3\n");
-        string[size_string] = '\0';
+        // string[size_string] = '\0';
         printf("error 4\n");
         // int size_string = end_string - start_string;
         // string = (char *)malloc(sizeof(char) * size_string + 1);
