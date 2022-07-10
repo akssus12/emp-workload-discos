@@ -68,6 +68,8 @@ int main(int argc, char** argv) {
         // strncpy(string, start_string, size_string);
         // string[size_string+1] = '\0';
         num_lines++;
+        printf("this line is %d\n", num_lines);
+
         printf("error 5\n");
         char * token = strtok(string, " ");
         printf("error 6\n");
