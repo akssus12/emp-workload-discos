@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
             token = strtok(NULL, " ");
         }
         start_string = end_string + 1;
+        free(string);
     }
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
