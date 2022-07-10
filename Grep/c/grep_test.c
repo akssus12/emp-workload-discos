@@ -31,6 +31,8 @@ void parse(const char* input){
       while(token != NULL){
         if(strcmp(token, target) == 0){
             printf("lines : %d\n", num_lines);
+        } else {
+            printf("not this lines %d\n", num_lines);
         }
         token = strtok(NULL, " ");
       }
