@@ -76,6 +76,7 @@ int main(int argc, char** argv) {
         printf("error 6\n");
         while( token != NULL ){
             printf("error 7\n");
+            printf("%s\n", token);
             if(strcmp(token, target) == 0){
                 printf("error 8\n");
                 printf("lines : %d\n", num_lines);
