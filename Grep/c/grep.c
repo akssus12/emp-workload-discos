@@ -21,6 +21,7 @@ int main(int argc, char** argv) {
     int ch = 0;
     int num_lines = 0;
     char * start_string, *end_string; // for strchr()
+    char * string;
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
@@ -53,8 +54,12 @@ int main(int argc, char** argv) {
     start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
+        int size_string = end_string - start_string;
+        string = (char *)malloc(sizeof(char) * size_string + 1);
+        strncpy(string, start_string, size_string);
+        memset(string, 0, size_string+1);
         num_lines++;
-        char * token = strtok(start_string, " ");
+        char * token = strtok(string, " ");
         while( token != NULL ){
             if(strcmp(token, target) == 0){
                 printf("lines : %d\n", num_lines);
