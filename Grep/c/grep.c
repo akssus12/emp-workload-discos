@@ -81,9 +81,9 @@ int main(int argc, char** argv) {
             token = strtok(NULL, " ");
         }
         printf("error 10\n");
-        start_string = end_string + 1;
-        printf("error 11\n");
         free(string);
+        printf("error 11\n");
+        start_string = end_string + 1;
         printf("error 12\n");
     }
     gettimeofday(&end, NULL);
