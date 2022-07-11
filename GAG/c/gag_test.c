@@ -58,10 +58,12 @@ void create(int key, int data){
     // If it is first node
     if (list_node[key].num == 0){
         //Init the start
+        printf("first node! \n");
         list_node[key].next = new_node;
         list_node[key].num++;
     } else {
         //Insert the node in the end
+        printf("insert node! \n");
         node = list_node[key].next;
         while(node->next != NULL){
             node = node->next;
@@ -129,12 +131,16 @@ int main(int agrc, char** argv){
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
+        printf("insert node key: %d, value: %d\n", key, value);
         create(key, value);
 
         token = strtok(NULL, " ");
     }
+    printf("finish insert node\n");
     aggregate(max);
+    printf("finish aggregation\n");
     destroy(max);
+    printf("finish destroy\n");
 
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
