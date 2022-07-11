@@ -40,7 +40,7 @@ void destroy(int max_key){
         } else {
             for (j=0; j<list_node[i].num; j++){
                 struct Node* remove = list_node[i].next;
-                list_node[i].next = list_node[i].next->next;
+                list_node[i].next = remove->next;
                 free(remove);
             }
         }
