@@ -84,7 +84,7 @@ void aggregate(int max_key){
                 sum += pt_node->value;
                 pt_node = pt_node->next;
             }
-            ist_node[i].sum = sum;
+            list_node[i].sum = sum;
             list_node[i].avg = sum/num;
             printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
         }
