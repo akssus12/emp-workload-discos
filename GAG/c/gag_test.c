@@ -39,13 +39,20 @@ void destroy(int max_key){
         if (list_node[i].num == 0) {
             continue;
         } else {
-            for (j=0; j<list_node[i].num && list_node[i].next != NULL; j++){
+            while(list_node[i].next != NULL){
                 remove = list_node[i].next;
                 list_node[i].next = remove->next;
                 printf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
                 remove = NULL;
             }
+            // for (j=0; j<list_node[i].num && list_node[i].next != NULL; j++){
+            //     remove = list_node[i].next;
+            //     list_node[i].next = remove->next;
+            //     printf("free node | key: %d, value: %d\n", i, remove->value);
+            //     free(remove);
+            //     remove = NULL;
+            // }
         }
     }
 }
