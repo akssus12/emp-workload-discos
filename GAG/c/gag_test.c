@@ -69,6 +69,7 @@ void create(int key, int data){
             node = node->next;
         }
         node->next = new_node;
+        list_node[key].num++;
     }
 }
 
