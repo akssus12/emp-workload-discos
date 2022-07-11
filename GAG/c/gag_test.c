@@ -34,12 +34,13 @@ void init(int max_key){
 
 void destroy(int max_key){
     int i, j;
+    struct Node* remove;
     for (i=0; i<max_key; i++){
         if (list_node[i].num == 0) {
             continue;
         } else {
             for (j=0; j<list_node[i].num; j++){
-                struct Node* remove = list_node[i].next;
+                remove = list_node[i].next;
                 list_node[i].next = remove->next;
                 printf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
