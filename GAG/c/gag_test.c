@@ -111,7 +111,7 @@ int main(int agrc, char** argv){
 
     // find max_key
     int max;
-    fscanf("%d\n", &max);
+    fscanf(fp, "%d\n", &max);
 
     fread(word, sb.st_size+1, 1, fp);
     word[sb.st_size+1] = '\0';
