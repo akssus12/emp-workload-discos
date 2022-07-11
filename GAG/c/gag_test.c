@@ -42,6 +42,7 @@ void destroy(int max_key){
             while(list_node[i].next != NULL){
                 remove = list_node[i].next;
                 list_node[i].next = remove->next;
+                remove->next=NULL;
                 printf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
                 remove = NULL;
@@ -93,14 +94,10 @@ void aggregate(int max_key){
             num = list_node[i].num;
             sum = 0;
             struct Node* pt_node = list_node[i].next;
-            while(pt_node->next != NULL){
+            for(j=0; j<num; j++){
                 sum += pt_node->value;
                 pt_node = pt_node->next;
             }
-            // for(j=0; j<num; j++){
-            //     sum += pt_node->value;
-            //     pt_node = pt_node->next;
-            // }
             list_node[i].sum = sum;
             list_node[i].avg = sum/num;
             printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
@@ -156,6 +153,8 @@ int main(int agrc, char** argv){
     printf("finish aggregation\n");
     destroy(max);
     printf("finish destroy\n");
+
+    free(word);
 
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
