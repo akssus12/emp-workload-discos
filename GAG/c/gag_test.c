@@ -41,6 +41,7 @@ void destroy(int max_key){
             for (j=0; j<list_node[i].num; j++){
                 struct Node* remove = list_node[i].next;
                 list_node[i].next = remove->next;
+                printf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
             }
         }
