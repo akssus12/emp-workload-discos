@@ -23,7 +23,7 @@ struct Front {
 struct Front* list_node;
 
 void init(int max_key){
-    list_node = malloc(max_key * sizeof(struct Front));
+    list_node = calloc(max_key, sizeof(struct Front));
     for (int i = 0; i<max_key; i++){
         list_node[i].next = NULL;
         list_node[i].sum = 0;
@@ -52,7 +52,7 @@ void destroy(int max_key){
 void create(int key, int data){
     // Create a new node
     struct Node *new_node, *node;
-    new_node = (struct Node*)malloc(sizeof(struct Node));
+    new_node = calloc(1, sizeof(struct Node));
     new_node->value = data;
     new_node->next = NULL;
 
