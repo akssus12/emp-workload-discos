@@ -74,16 +74,21 @@ void aggregate(int max_key){
     int i, j;
     int sum, num;
     for(i=0; i<max_key; i++){
-        num = list_node[i].num;
-        sum = 0;
-        struct Node* pt_node = list_node[i].next;
-        for(j=0; j<num; j++){
-            sum += pt_node->value;
-            pt_node = pt_node->next;
+        if (list_node[i].next == NULL){
+            continue;
+        } else {
+            num = list_node[i].num;
+            sum = 0;
+            struct Node* pt_node = list_node[i].next;
+            for(j=0; j<num; j++){
+                sum += pt_node->value;
+                pt_node = pt_node->next;
+            }
+            ist_node[i].sum = sum;
+            list_node[i].avg = sum/num;
+            printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
         }
-        list_node[i].sum = sum;
-        list_node[i].avg = sum/num;
-        printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
+        
     }
 }
 
