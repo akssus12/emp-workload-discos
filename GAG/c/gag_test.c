@@ -10,14 +10,14 @@
 struct Node {
     struct Node* next;
     int value;
-}
+};
 
 struct Front {
     struct Node* next;
     int sum;
     int num;
     double avg;
-}
+};
 
 // Empty List of Node
 struct Front* list_node;
