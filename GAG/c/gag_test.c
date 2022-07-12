@@ -142,6 +142,8 @@ int main(int agrc, char** argv){
 
     init(max);
     printf("size of list_node[] : %lu\n", malloc_usable_size(list_node)/sizeof(struct Front));
+    printf("size of list_node : %lu\n", malloc_usable_size(list_node));
+    printf("addr of list_node's pointer : %p\n", list_node);
 
     char * token = strtok(word, " ");
 
