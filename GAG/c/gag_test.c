@@ -65,6 +65,8 @@ void create(int key, int data){
     new_node = calloc(1, sizeof(struct Node));
     new_node->value = data;
     new_node->next = NULL;
+    printf("size of created new_node : %lu\n", malloc_usable_size(new_node));
+    printf("size of created new_node/sizeof(Node) : %lu\n", malloc_usable_size(new_node)/sizeof(struct Node));
 
     // If it is first node
     if (list_node[key].num == 0){
