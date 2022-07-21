@@ -75,6 +75,11 @@ int main(int argc, char** argv) {
 
     stat(argv[1], &sb);
 
+    total_line = getTotalLine(filename);
+    line_size = getSpecificSize(filename, (int)total_line/2);
+    printf("total_line : %d\n", total_line);
+    printf("line_size : %d\n", line_size);
+
     FILE *fp;
 
     printf("debug 1\n");
@@ -85,12 +90,6 @@ int main(int argc, char** argv) {
     }
 
     printf("debug 2\n");
-
-    total_line = getTotalLine(filename);
-    line_size = getSpecificSize(filename, (int)total_line/2);
-
-    printf("total_line : %d\n", total_line);
-    printf("line_size : %d\n", line_size);
 
     if (rank == 0) {
         word = malloc(line_size + 1);
