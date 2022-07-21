@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
                 printf("lines : %d\n", num_lines);
                 array_line[num-1] = num_lines;
                 num ++;
-                if( NULL == (array_line = (int*)realloc(array_line, num)) ){
+                if( NULL == (array_line = (int*)realloc(array_line, sizeof(int)*num)) ){
                     free(backup_ptr);
                     fprintf(stderr, "Memory allocation is failed");
                     exit(1);
