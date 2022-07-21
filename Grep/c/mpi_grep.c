@@ -76,35 +76,24 @@ int main(int argc, char** argv) {
     char * word;
     char * start_string, *end_string; // for strchr()
 
-    printf("debug 0\n");
-
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
-    printf("debug 01\n");
 
     gettimeofday(&start, NULL);
-    printf("debug 02\n");
 
     stat(argv[1], &sb);
-    printf("debug 03\n");
 
     total_line = getTotalLine(filename);
-    printf("debug 04\n");
     line_size = getSpecificSize(filename, (int)total_line/2);
-    printf("debug 05\n");
     printf("total_line : %d\n", total_line);
     printf("line_size : %lu\n", line_size);
 
     FILE *fp;
 
-    printf("debug 1\n");
-
     fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Error opening data file\n");
     }
-
-    printf("debug 2\n");
 
     if (rank == 0) {
         word = malloc(line_size + 1);
@@ -123,8 +112,6 @@ int main(int argc, char** argv) {
         word[sb.st_size - line_size + 1] = '\0';
     }
 
-    printf("debug 3\n");
-
     printf("line_size : %lu\n", line_size);
     printf("sb.st_size : %lu\n", sb.st_size);
     printf("word size : %lu\n", malloc_usable_size(word));
@@ -134,14 +121,10 @@ int main(int argc, char** argv) {
         *p = tolower(*p);
     }
 
-    printf("debug 4\n");
-
     int * array_line = calloc(num, sizeof(int));
     int * backup_ptr = array_line;
 
     start_string = end_string = (char *)word;
-
-    printf("debug 5\n");
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
@@ -174,8 +157,6 @@ int main(int argc, char** argv) {
         start_string = end_string + 1;
     }
 
-    printf("debug 6\n");
-
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0){
@@ -185,8 +166,6 @@ int main(int argc, char** argv) {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    printf("debug 7\n");
-
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0){
@@ -194,8 +173,6 @@ int main(int argc, char** argv) {
     } else {
         MPI_Send(array_line, num, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
-
-    printf("debug 8\n");
 
     if (rank == 0){
         for (int i=0; i<num; i++){
@@ -207,8 +184,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    printf("debug 9\n");
-
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
 
@@ -218,6 +193,8 @@ int main(int argc, char** argv) {
     free(word);
     free(received_array_line);
     free(array_line);
+    
+    MPI_Finalize();
 
     return 0;
 }
