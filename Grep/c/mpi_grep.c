@@ -20,6 +20,8 @@ int getTotalLine(char *name){
 
     while((c=fgetc(ptr))!=EOF)
         if(c=='\n') line++;
+
+    fseek(ptr, 0, SEEK_SET);
     fclose(ptr);
 
     return(line);
@@ -45,7 +47,9 @@ int getSpecificSize(char *name, int target_line){
         } else {
             break;
         }
-    }    
+    }
+
+    fseek(ptr, 0, SEEK_SET);
     fclose(ptr);
 
     return(size);
