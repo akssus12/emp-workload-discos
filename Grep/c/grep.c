@@ -29,14 +29,10 @@ int main(int argc, char** argv) {
         printf("Error opening data file\n");
     }
 
-    printf("debug 1\n");
-
     stat(argv[1], &sb);
     char* word = malloc(sb.st_size+1);
     memset(word, 0, sb.st_size+1);
     word[sb.st_size+1] = '\0';
-
-    printf("debug 2\n");
 
     //fscanf(fp,"%100s", word);
     fread(word, sb.st_size+1, 1, fp);
@@ -44,14 +40,10 @@ int main(int argc, char** argv) {
     printf("sb.st_size : %lu\n", sb.st_size);
     printf("word size : %lu\n", malloc_usable_size(word));
 
-    printf("debug 3\n");
-
     // Convert word to lower case in place.
     for (char* p = word; *p; p++) {
         *p = tolower(*p);
     }
-
-    printf("debug 4\n");
 
     start_string = end_string = (char *)word;
 
@@ -80,8 +72,6 @@ int main(int argc, char** argv) {
     }
     gettimeofday(&end, NULL);
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
-
-    printf("debug 5\n");
 
     printf("\nTotaltime = %f seconds\n", totaltime);
 
