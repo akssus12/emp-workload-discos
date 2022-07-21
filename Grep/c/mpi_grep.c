@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     int num_lines = 0;
     int num = 1;
     int received_num;
-    int received_array_line;
+    int *received_array_line;
     int total_line;
     int line_size;
     char * word;
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
     }
 
     total_line = getTotalLine(filename);
-    line_size = getSpecificSize(total_line/2);
+    line_size = getSpecificSize((int)total_line/2);
     if (rank == 0) {
         word = malloc(line_size + 1);
         memset(word, 0, line_size + 1);
@@ -91,13 +91,13 @@ int main(int argc, char** argv) {
 
     } else {
         word = malloc(sb.st_size - line_size + 1);
-        memset(word, 0, sb.size - line_size + 1);
+        memset(word, 0, sb.st_size - line_size + 1);
 
-        fread(word, sb.size - line_size, 1, fp);
+        fread(word, sb.st_size - line_size, 1, fp);
         word[sb.st_size - line_size + 1] = '\0';
     }
 
-    printf("line_size : %lu\n", line_size);
+    printf("line_size : %d\n", line_size);
     printf("sb.st_size : %lu\n", sb.st_size);
     printf("word size : %lu\n", malloc_usable_size(word));
 
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     int * array_line = calloc(num, sizeof(int));
     int * backup_ptr = array_line;
 
-    start_string = end_string = (char *)word;
+    start_string = end_str   ing = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
