@@ -7,11 +7,6 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-typedef struct {
-    char* word;
-    int count;
-} count;
-
 int main(int argc, char** argv) {
     struct stat sb;
     struct timeval start, end;

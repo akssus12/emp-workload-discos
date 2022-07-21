@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#define MAX_UNIQUES 6000000
+#define MAX_UNIQUES 8000000
 
 typedef struct {
     char* word;

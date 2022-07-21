@@ -7,8 +7,8 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#define MAX_UNIQUES 6000000
-#define Max_length 600
+#define MAX_UNIQUES 8000000
+#define Max_length 100
 
 typedef struct {
     int count;
@@ -67,6 +67,8 @@ int main(int argc, char** argv) {
     int total_words = 0;
     int received_num_words[2];
 
+    char *start_string, *end_string; // for strchr()
+
     // Allocate hash table.
     if (hcreate(MAX_UNIQUES) == 0) {
         fprintf(stderr, "error creating hash table\n");
@@ -101,51 +103,54 @@ int main(int argc, char** argv) {
         *p = tolower(*p);
     }
 
-    char * token = strtok(word, " ");
+    start_string = end_string = (char *)word;
 
-    while( token != NULL ) {
-        // Search for word in hash table.
+    while( (end_string = strchr(start_string, '\n')) ){
+        int size_string = end_string - start_string + 1;
+        char *string = calloc(size_string, sizeof(char));
+        strncpy(string, start_string, size_string-1);
 
-        ENTRY item = {token, NULL};
-        ENTRY* found = hsearch(item, FIND);
-        if (found != NULL) {
-            // Word already in table, increment count.
-            int* pn = (int*)found->data;
-            (*pn)++;
+        char * token = strtok(string, " ");
+        while( token != NULL ){
+            // Search for word in hash table.
+            ENTRY item = {token, NULL};
+            ENTRY* found = hsearch(item, FIND);
+            if (found != NULL) {
+                // Word already in table, increment count.
+                int* pn = (int*)found->data;
+                (*pn)++;
+                token = strtok(NULL, " ");
+            } else {
+                // Word not in table, insert it with count 1.
+                item.key = strdup(token); // need to copy word
+                if (item.key == NULL) {
+                    fprintf(stderr, "out of memory in strdup\n");
+                    return 1;
+                }
+                int* pn = malloc(sizeof(int));
+                if (pn == NULL) {
+                    fprintf(stderr, "out of memory in malloc\n");
+                    return 1;
+                }
+                *pn = 1;
+                item.data = pn;
+                ENTRY* entered = hsearch(item, ENTER);
+                if (entered == NULL) {
+                    fprintf(stderr, "table full, increase MAX_UNIQUES\n");
+                    return 1;
+                }
 
-            token = strtok(NULL, " ");
-        } else {
-            // Word not in table, insert it with count 1.
-            item.key = strdup(token); // need to copy word
-            if (item.key == NULL) {
-                fprintf(stderr, "out of memory in strdup\n");
-                return 1;
+                // And add to words list for iterating.
+                words[num_words].word = item.key;
+                num_words++;
+                token = strtok(NULL, " ");
             }
-            int* pn = malloc(sizeof(int));
-            if (pn == NULL) {
-                fprintf(stderr, "out of memory in malloc\n");
-                return 1;
-            }
-            *pn = 1;
-            item.data = pn;
-            ENTRY* entered = hsearch(item, ENTER);
-            if (entered == NULL) {
-                fprintf(stderr, "table full, increase MAX_UNIQUES\n");
-                return 1;
-            }
-
-            // And add to words list for iterating.
-            // words[num_words].word = item.key;
-            // num_words++;
-            strncpy(words[num_words].word, item.key, Max_length-1);
-            words[num_words].word[Max_length] = '\0';
-            num_words++;
-
-            token = strtok(NULL, " ");
         }
+        free(string);
+        start_string = end_string + 1;
     }
 
-    // Iterate once to add counts to words list, then sort.
+    // Iterate once to add counts to words list (not sort)
     for (int i = 0; i < num_words; i++) {
         ENTRY item = {words[i].word, NULL};
         ENTRY* found = hsearch(item, FIND);
@@ -253,8 +258,6 @@ int main(int argc, char** argv) {
         printf("\nTotaltime = %f seconds\n", totaltime);
         free(receive_words);
         
-        
-
     }   
     fclose(fp);
     free(words);
