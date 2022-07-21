@@ -14,6 +14,9 @@ int getTotalLine(char *name){
     char c;
 
     ptr=fopen(name,"r");
+    if (ptr == NULL) {
+        printf("Error opening data file\n");
+    }
 
     while((c=fgetc(ptr))!=EOF)
         if(c=='\n') line++;
@@ -29,6 +32,9 @@ int getSpecificSize(char *name, int target_line){
     char c;
 
     ptr=fopen(name,"r");
+    if (ptr == NULL) {
+        printf("Error opening data file\n");
+    }
     
     while((c=fgetc(ptr))!=EOF){
         if( line != target_line ) {
