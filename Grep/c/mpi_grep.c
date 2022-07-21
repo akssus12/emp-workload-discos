@@ -76,13 +76,18 @@ int main(int argc, char** argv) {
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
+    printf("debug 01\n");
 
     gettimeofday(&start, NULL);
+    printf("debug 02\n");
 
     stat(argv[1], &sb);
+    printf("debug 03\n");
 
     total_line = getTotalLine(filename);
+    printf("debug 04\n");
     line_size = getSpecificSize(filename, (int)total_line/2);
+    printf("debug 05\n");
     printf("total_line : %d\n", total_line);
     printf("line_size : %d\n", line_size);
 
