@@ -9,28 +9,28 @@
 #include <sys/stat.h>
 
 int getTotalLine(char *name){
-    FILE *fp;
+    FILE *ptr;
     int line=0;
     char c;
 
-    fp=fopen(name,"r");
+    ptr=fopen(name,"r");
 
-    while((c=fgetc(fp))!=EOF)
+    while((c=fgetc(ptr))!=EOF)
         if(c=='\n') line++;
-    fclose(fp);
+    fclose(ptr);
 
     return(line);
 }
 
 int getSpecificSize(char *name, int target_line){
-    FILE *fp;
+    FILE *ptr;
     int size=0;
     int line=0;
     char c;
 
-    fp=fopen(name,"r");
+    ptr=fopen(name,"r");
     
-    while((c=fgetc(fp))!=EOF){
+    while((c=fgetc(ptr))!=EOF){
         if( line != target_line ) {
             size ++;
             if( c == '\n') {
@@ -40,7 +40,7 @@ int getSpecificSize(char *name, int target_line){
             break;
         }
     }    
-    fclose(fp);
+    fclose(ptr);
 
     return(size);
 }
