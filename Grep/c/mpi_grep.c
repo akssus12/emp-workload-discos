@@ -174,6 +174,8 @@ int main(int argc, char** argv) {
 
     fclose(fp);
     free(word);
+    free(received_array_line);
+    free(array_line);
 
     return 0;
 }
