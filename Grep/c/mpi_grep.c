@@ -88,6 +88,10 @@ int main(int argc, char** argv) {
 
     total_line = getTotalLine(filename);
     line_size = getSpecificSize(filename, (int)total_line/2);
+
+    printf("total_line : %d\n", total_line);
+    printf("line_size : %d\n", line_size);
+
     if (rank == 0) {
         word = malloc(line_size + 1);
         memset(word, 0, line_size + 1);
@@ -98,6 +102,8 @@ int main(int argc, char** argv) {
     } else {
         word = malloc(sb.st_size - line_size + 1);
         memset(word, 0, sb.st_size - line_size + 1);
+
+        fseek(fp, line_size, SEEK_SET);
 
         fread(word, sb.st_size - line_size, 1, fp);
         word[sb.st_size - line_size + 1] = '\0';
