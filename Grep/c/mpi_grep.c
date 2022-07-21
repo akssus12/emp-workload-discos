@@ -190,9 +190,9 @@ int main(int argc, char** argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0){
-        MPI_Recv(&received_array_line, received_num, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(received_array_line, received_num, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     } else {
-        MPI_Send(&array_line, num, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(array_line, num, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
     printf("debug 8\n");
