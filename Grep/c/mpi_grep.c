@@ -49,6 +49,8 @@ int getSpecificSize(char *name, int target_line){
         }
     }
 
+    printf("size : %d\n", size);
+
     fseek(ptr, 0, SEEK_SET);
     fclose(ptr);
 
