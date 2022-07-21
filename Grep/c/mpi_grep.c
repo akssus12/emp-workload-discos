@@ -175,13 +175,14 @@ int main(int argc, char** argv) {
     }
 
     if (rank == 0){
-        for (int i=0; i<num; i++){
+        for (int i=0; i<num-1; i++){
             printf("%d\n", array_line[i]);
         }
 
         for (int i=0; i<received_num-1; i++){
-            printf("%d\n", num + received_array_line[i]);
+            printf("%d\n", total_line/2 + received_array_line[i]);
         }
+        free(received_array_line);
     }
 
     gettimeofday(&end, NULL);
@@ -191,7 +192,6 @@ int main(int argc, char** argv) {
 
     fclose(fp);
     free(word);
-    free(received_array_line);
     free(array_line);
     
     MPI_Finalize();
