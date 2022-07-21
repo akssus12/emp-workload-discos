@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 
     printf("debug 3\n");
 
-    printf("line_size : %d\n", line_size);
+    printf("line_size : %lu\n", line_size);
     printf("sb.st_size : %lu\n", sb.st_size);
     printf("word size : %lu\n", malloc_usable_size(word));
 
