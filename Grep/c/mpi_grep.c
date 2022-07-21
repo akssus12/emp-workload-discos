@@ -27,9 +27,9 @@ int getTotalLine(char *name){
     return(line);
 }
 
-int getSpecificSize(char *name, int target_line){
+long getSpecificSize(char *name, int target_line){
     FILE *ptr;
-    int size=0;
+    long size=0;
     int line=0;
     char c;
 
@@ -48,8 +48,6 @@ int getSpecificSize(char *name, int target_line){
             break;
         }
     }
-
-    printf("size : %d\n", size);
 
     fseek(ptr, 0, SEEK_SET);
     fclose(ptr);
@@ -74,7 +72,7 @@ int main(int argc, char** argv) {
     int received_num;
     int *received_array_line;
     int total_line;
-    int line_size;
+    long line_size;
     char * word;
     char * start_string, *end_string; // for strchr()
 
@@ -95,7 +93,7 @@ int main(int argc, char** argv) {
     line_size = getSpecificSize(filename, (int)total_line/2);
     printf("debug 05\n");
     printf("total_line : %d\n", total_line);
-    printf("line_size : %d\n", line_size);
+    printf("line_size : %lu\n", line_size);
 
     FILE *fp;
 
