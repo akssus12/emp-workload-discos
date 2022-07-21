@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
     }
 
     total_line = getTotalLine(filename);
-    line_size = getSpecificSize((int)total_line/2);
+    line_size = getSpecificSize(filename, (int)total_line/2);
     if (rank == 0) {
         word = malloc(line_size + 1);
         memset(word, 0, line_size + 1);
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     int * array_line = calloc(num, sizeof(int));
     int * backup_ptr = array_line;
 
-    start_string = end_str   ing = (char *)word;
+    start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
     if (rank == 0){
         MPI_Recv(&received_num, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        received_array_line = calloc(received_num, received_array_line);
+        received_array_line = calloc(received_num, sizeof(int));
     } else {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
