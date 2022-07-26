@@ -75,13 +75,15 @@ int* received_num_array;
 
 // Function to initialize list_node(struct Front) & sum_array, num_array
 void init(int max_key){
+    int i;
+
     list_node = calloc(max_key, sizeof(struct Front));
     sum_array = calloc(max_key, sizeof(int));
     num_array = calloc(max_key, sizeof(int));
     received_sum_array = calloc(max_key, sizeof(int));
     received_num_array = calloc(max_key, sizeof(int));
 
-    for (int i = 0; i<max_key; i++){
+    for (i = 0; i<max_key; i++){
         list_node[i].next = NULL;
         list_node[i].num = 0;
     }
@@ -189,6 +191,8 @@ int main(int argc, char** argv) {
         word = malloc(line_size + 1);
         memset(word, 0, line_size + 1);
 
+        fseek(fp, 0, SEEK_SET);
+
         fread(word, line_size + 1, 1, fp);
         word[line_size + 1] = '\0';
 
@@ -247,7 +251,7 @@ int main(int argc, char** argv) {
             } else {
                 num = num_array[i];
                 sum = sum_array[i];
-                printf("key: %d | num: %d | sum: %d | avg: %f\n", i, num, sum, sum/num);
+                printf("key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
             }
         }
     }
