@@ -206,6 +206,7 @@ int main(int argc, char** argv) {
         word = malloc(sb.st_size - line_size + 1);
         memset(word, 0, sb.st_size - line_size + 1);
 
+        fseek(fp, 0, SEEK_SET);
         fseek(fp, line_size, SEEK_SET);
 
         fread(word, sb.st_size - line_size, 1, fp);
@@ -214,6 +215,8 @@ int main(int argc, char** argv) {
         MPI_Recv(&max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         printf("(rank 1)max : %d\n", max);
     }
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     printf("line_size : %lu\n", line_size);
     printf("sb.st_size : %lu\n", sb.st_size);
