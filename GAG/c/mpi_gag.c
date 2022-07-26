@@ -241,6 +241,8 @@ int main(int argc, char** argv) {
     aggregate(max);
     printf("finish aggregation\n");
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
     MPI_Reduce(sum_array, received_sum_array, max, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(num_array, received_num_array, max, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
