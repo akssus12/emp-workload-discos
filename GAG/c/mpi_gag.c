@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
     printf("size of list_node : %lu\n", malloc_usable_size(list_node));
     printf("addr of list_node's pointer : %p\n", list_node);
 
-    char * token = strtok(word, '\n');
+    char * token = strtok(word, "\n");
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
         printf("insert node key: %d, value: %d\n", key, value);
         create(key, value);
 
-        token = strtok(NULL, " ");
+        token = strtok(NULL, "\n");
     }
     printf("finish insert node\n");
     aggregate(max);
