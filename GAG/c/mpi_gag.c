@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
         float sum;
         int num;
         for(i=0; i<max; i++){
-            if (num_array[i] == 0){
+            if (received_num_array[i] == 0){
                 continue;
             } else {
                 num = received_num_array[i];
