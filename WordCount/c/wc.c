@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#define MAX_UNIQUES 8000000
+#define MAX_UNIQUES 10000000
 
 typedef struct {
     char* word;
@@ -65,8 +65,9 @@ int main(int argc, char** argv) {
     word[sb.st_size+1] = '\0';
     printf("sb.st_size : %lu\n", sb.st_size);
     printf("word size : %lu\n", malloc_usable_size(word));
+    char* p;
     // Convert word to lower case in place.
-    for (char* p = word; *p; p++) {
+    for (p = word; *p; p++) {
         *p = tolower(*p);
     }
 
@@ -118,7 +119,8 @@ int main(int argc, char** argv) {
     }
 
     // Iterate once to add counts to words list, then sort.
-    for (int i = 0; i < num_words; i++) {
+    int i;
+    for (i = 0; i < num_words; i++) {
         ENTRY item = {words[i].word, NULL};
         ENTRY* found = hsearch(item, FIND);
         if (found == NULL) { // shouldn't happen

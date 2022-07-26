@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include <mpi.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -153,8 +154,7 @@ void aggregate(int max_key){
     }
 }
 
-int main(int agrc, char** argv){
-
+int main(int argc, char** argv) {
     MPI_Init( &argc, &argv );
     int rank, size;
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
@@ -189,7 +189,7 @@ int main(int agrc, char** argv){
         word = malloc(line_size + 1);
         memset(word, 0, line_size + 1);
 
-        fread(word, line_size + 1);
+        fread(word, line_size + 1, 1, fp);
         word[line_size + 1] = '\0';
 
         // find max_key
@@ -205,9 +205,9 @@ int main(int agrc, char** argv){
         fseek(fp, line_size, SEEK_SET);
 
         fread(word, sb.st_size - line_size, 1, fp);
-        wordp[sb.st_size - line_size + 1] = '\0';
+        word[sb.st_size - line_size + 1] = '\0';
 
-        MPI_Recv(&max, 1, , MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         printf("(rank 1)max : %d\n", max);
     }
 
@@ -239,7 +239,8 @@ int main(int agrc, char** argv){
 
     if (rank == 0) {
         int i, j;
-        int sum, num;
+        float sum;
+        int num;
         for(i=0; i<max; i++){
             if (num_array[i] == 0){
                 continue;
