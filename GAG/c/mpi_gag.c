@@ -171,6 +171,7 @@ int main(int argc, char** argv) {
     long line_size;
     char* word;
     int max = 0;
+    int received_max = 0;
 
     strcpy(filename, argv[1]);
 
@@ -212,8 +213,9 @@ int main(int argc, char** argv) {
         fread(word, sb.st_size - line_size, 1, fp);
         word[sb.st_size - line_size + 1] = '\0';
 
-        MPI_Recv(&max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("(rank 1)max : %d\n", max);
+        MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("(rank 1)max : %d\n", received_max);
+        max = received_max;
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
