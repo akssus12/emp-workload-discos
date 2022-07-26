@@ -260,7 +260,7 @@ int main(int argc, char** argv) {
             } else {
                 num = received_num_array[i];
                 sum = received_sum_array[i];
-                printf("key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
+                printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
             }
         }
     }
