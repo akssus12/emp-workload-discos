@@ -258,8 +258,8 @@ int main(int argc, char** argv) {
             if (num_array[i] == 0){
                 continue;
             } else {
-                num = num_array[i];
-                sum = sum_array[i];
+                num = received_num_array[i];
+                sum = received_sum_array[i];
                 printf("key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
             }
         }
