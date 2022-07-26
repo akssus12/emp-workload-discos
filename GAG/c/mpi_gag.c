@@ -188,6 +188,8 @@ int main(int argc, char** argv) {
         printf("Error opening data file\n");
     }
 
+    stat(argv[1], &sb);
+
     if (rank == 0){
         word = malloc(line_size + 1);
         memset(word, 0, line_size + 1);
@@ -277,6 +279,8 @@ int main(int argc, char** argv) {
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
 
     printf("\nTotaltime = %f seconds\n", totaltime);
+
+    MPI_Finalize();
 
     return 0;
 }
