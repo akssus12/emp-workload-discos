@@ -23,8 +23,9 @@ struct Front {
 struct Front* list_node;
 
 void init(int max_key){
+    int i;
     list_node = calloc(max_key, sizeof(struct Front));
-    for (int i = 0; i<max_key; i++){
+    for (i = 0; i<max_key; i++){
         list_node[i].next = NULL;
         list_node[i].sum = 0;
         list_node[i].num = 0;
