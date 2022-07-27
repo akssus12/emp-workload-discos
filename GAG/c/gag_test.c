@@ -150,8 +150,8 @@ int main(int agrc, char** argv){
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
-        printf("%s\n", token);
-        printf("insert node key: %d, value: %d\n", key, value);
+        // printf("%s\n", token);
+        // printf("insert node key: %d, value: %d\n", key, value);
         create(key, value);
 
         token = strtok(NULL, "\n");
