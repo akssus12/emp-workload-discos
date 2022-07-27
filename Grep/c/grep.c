@@ -41,7 +41,8 @@ int main(int argc, char** argv) {
     printf("word size : %lu\n", malloc_usable_size(word));
 
     // Convert word to lower case in place.
-    for (char* p = word; *p; p++) {
+    char* p;
+    for (p = word; *p; p++) {
         *p = tolower(*p);
     }
 
