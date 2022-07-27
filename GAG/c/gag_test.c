@@ -44,7 +44,7 @@ void destroy(int max_key){
                 remove = list_node[i].next;
                 list_node[i].next = remove->next;
                 // remove->next=NULL;
-                printf("free node | key: %d, value: %d\n", i, remove->value);
+                // printf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
                 // remove = NULL;
             }
@@ -66,18 +66,18 @@ void create(int key, int data){
     new_node = calloc(1, sizeof(struct Node));
     new_node->value = data;
     new_node->next = NULL;
-    printf("size of created new_node : %lu\n", malloc_usable_size(new_node));
-    printf("size of created new_node/sizeof(Node) : %lu\n", malloc_usable_size(new_node)/sizeof(struct Node));
-    printf("addr of new_node's pointer : %p\n", new_node);
+    // printf("size of created new_node : %lu\n", malloc_usable_size(new_node));
+    // printf("size of created new_node/sizeof(Node) : %lu\n", malloc_usable_size(new_node)/sizeof(struct Node));
+    // printf("addr of new_node's pointer : %p\n", new_node);
     // If it is first node
     if (list_node[key].num == 0){
         //Init the start
-        printf("first node! \n");
+        // printf("first node! \n");
         list_node[key].next = new_node;
         list_node[key].num++;
     } else {
         //Insert the node in the end
-        printf("insert node! \n");
+        // printf("insert node! \n");
         node = list_node[key].next;
         while(node->next != NULL){
             node = node->next;
@@ -142,9 +142,9 @@ int main(int agrc, char** argv){
     printf("word size : %lu\n", malloc_usable_size(word));
 
     init(max);
-    printf("size of list_node[] : %lu\n", malloc_usable_size(list_node)/sizeof(struct Front));
-    printf("size of list_node : %lu\n", malloc_usable_size(list_node));
-    printf("addr of list_node's pointer : %p\n", list_node);
+    // printf("size of list_node[] : %lu\n", malloc_usable_size(list_node)/sizeof(struct Front));
+    // printf("size of list_node : %lu\n", malloc_usable_size(list_node));
+    // printf("addr of list_node's pointer : %p\n", list_node);
 
     char * token = strtok(word, "\n");
 
