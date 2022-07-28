@@ -44,7 +44,7 @@ void destroy(int max_key){
                 remove = list_node[i].next;
                 list_node[i].next = remove->next;
                 // remove->next=NULL;
-                // printf("free node | key: %d, value: %d\n", i, remove->value);
+                sprintf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
                 // remove = NULL;
             }
@@ -78,7 +78,7 @@ void create(int key, int data){
     } else {
         //Insert the node in the end
         // printf("insert node! \n");
-        node = list_node[key].next;
+        node = list_node[key].next; 
         while(node->next != NULL){
             node = node->next;
         }
@@ -143,16 +143,16 @@ int main(int agrc, char** argv){
     printf("word size : %lu\n", malloc_usable_size(word));
 
     init(max);
-    // printf("size of list_node[] : %lu\n", malloc_usable_size(list_node)/sizeof(struct Front));
-    // printf("size of list_node : %lu\n", malloc_usable_size(list_node));
-    // printf("addr of list_node's pointer : %p\n", list_node);
+    printf("size of list_node[] : %lu\n", malloc_usable_size(list_node)/sizeof(struct Front));
+    printf("size of list_node : %lu\n", malloc_usable_size(list_node));
+    printf("addr of list_node's pointer : %p\n", list_node);
 
     char * token = strtok(word, "\n");
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
-        // printf("%s\n", token);
-        // printf("insert node key: %d, value: %d\n", key, value);
+        printf("%s\n", token);
+        printf("insert node key: %d, value: %d\n", key, value);
         key = 0;                // FOR AG
         create(key, value);
 
