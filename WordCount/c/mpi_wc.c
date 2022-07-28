@@ -141,7 +141,9 @@ int main(int argc, char** argv) {
                 }
 
                 // And add to words list for iterating.
-                words[num_words].word = item.key;
+                // words[num_words].word = item.key; // error : assignment to expression with array type
+                strcpy(words[num_words].word, item.key);
+                
                 num_words++;
                 token = strtok(NULL, " ");
             }
