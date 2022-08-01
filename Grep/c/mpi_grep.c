@@ -130,12 +130,6 @@ int main(int argc, char** argv) {
         int size_string = end_string - start_string + 1;
         char *string = calloc(size_string, sizeof(char));
         strncpy(string, start_string, size_string-1);
-        // string[size_string] = '\0';
-        // int size_string = end_string - start_string;
-        // string = (char *)malloc(sizeof(char) * size_string + 1);
-        // memset(string, 0, sizeof(char) * size_string + 1);
-        // strncpy(string, start_string, size_string);
-        // string[size_string+1] = '\0';
         num_lines++;
 
         char * token = strtok(string, " ");
