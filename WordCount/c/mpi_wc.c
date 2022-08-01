@@ -167,10 +167,6 @@ int main(int argc, char** argv) {
 
     MPI_Gather(&num_words, 1, MPI_INT, received_num_words, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // for (int i=0 ; i<num_words; i++){
-    //     printf("%s %d\n", words[i].word, words[i].count);
-    // }
-    // printf("total num : %d | %d\n", num_words, rank);
 
     MPI_Barrier(MPI_COMM_WORLD);
     
