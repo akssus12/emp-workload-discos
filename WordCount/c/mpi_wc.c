@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 
 #define MAX_UNIQUES 8000000
 #define Max_length 100
@@ -67,6 +68,9 @@ int main(int argc, char** argv) {
     int total_words = 0;
     int received_num_words[2];
 
+    bool is_alpha = true;
+    int i;
+
     char *start_string, *end_string; // for strchr()
 
     // Allocate hash table.
@@ -112,6 +116,19 @@ int main(int argc, char** argv) {
 
         char * token = strtok(string, " ");
         while( token != NULL ){
+            for ( i=0; token[i] != '\0'; i++ ){
+                if ( isalpha(token[i]) == 0 ) {
+                    is_alpha = false;
+                    break;
+                }
+            }
+            
+            if ( !is_alpha ){
+                token = strtok(NULL, " ");
+                is_alpha = true;
+                continue;
+            }
+            
             // Search for word in hash table.
             ENTRY item = {token, NULL};
             ENTRY* found = hsearch(item, FIND);
@@ -153,7 +170,7 @@ int main(int argc, char** argv) {
     }
 
     // Iterate once to add counts to words list (not sort)
-    for (int i = 0; i < num_words; i++) {
+    for (i = 0; i < num_words; i++) {
         ENTRY item = {words[i].word, NULL};
         ENTRY* found = hsearch(item, FIND);
         if (found == NULL) { // shouldn't happen
@@ -195,7 +212,7 @@ int main(int argc, char** argv) {
         // // memcpy(final_words, words, num_words * sizeof(count));
 
         
-        for (int i=num_words; i<total_words; i++){
+        for (i=num_words; i<total_words; i++){
             // Search for word in hash table.
             ENTRY item = {receive_words[i].word, NULL};
             ENTRY* found = hsearch(item, FIND);
@@ -234,7 +251,7 @@ int main(int argc, char** argv) {
             }
         }    
 
-        for (int i = 0; i < num_words; i++) {
+        for (i = 0; i < num_words; i++) {
                  ENTRY item = {words[i].word, NULL};
                  ENTRY* found = hsearch(item, FIND);
                  if (found == NULL) { // shouldn't happen

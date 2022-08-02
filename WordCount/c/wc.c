@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 
 #define MAX_UNIQUES 10000000
 
@@ -35,6 +36,8 @@ int main(int argc, char** argv) {
     // store the words in an array too (also used for sorting).
     count* words = calloc(MAX_UNIQUES, sizeof(count));
     int num_words = 0;
+    bool is_alpha = true;
+    int i;
 
     char *start_string, *end_string; // for strchr()
 
@@ -80,6 +83,19 @@ int main(int argc, char** argv) {
 
         char * token = strtok(string, " ");
         while( token != NULL ){
+            for ( i=0; token[i] != '\0'; i++ ){
+                if ( isalpha(token[i]) == 0 ) {
+                    is_alpha = false;
+                    break;
+                }
+            }
+            
+            if ( !is_alpha ){
+                token = strtok(NULL, " ");
+                is_alpha = true;
+                continue;
+            }
+
             // Search for word in hash table.
             ENTRY item = {token, NULL};
             ENTRY* found = hsearch(item, FIND);
@@ -119,7 +135,6 @@ int main(int argc, char** argv) {
     }
 
     // Iterate once to add counts to words list, then sort.
-    int i;
     for (i = 0; i < num_words; i++) {
         ENTRY item = {words[i].word, NULL};
         ENTRY* found = hsearch(item, FIND);
