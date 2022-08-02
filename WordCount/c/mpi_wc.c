@@ -9,7 +9,7 @@
 #include <stdbool.h>
 
 #define MAX_UNIQUES 8000000
-#define Max_length 100
+#define Max_length 50
 
 typedef struct {
     int count;
@@ -123,12 +123,12 @@ int main(int argc, char** argv) {
                 }
             }
             
-            if ( !is_alpha ){
+            if ( !is_alpha || strlen(token) >= 50 ){
                 token = strtok(NULL, " ");
                 is_alpha = true;
                 continue;
             }
-            
+
             // Search for word in hash table.
             ENTRY item = {token, NULL};
             ENTRY* found = hsearch(item, FIND);

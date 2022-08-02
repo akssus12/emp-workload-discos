@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
                 }
             }
             
-            if ( !is_alpha ){
+            if ( !is_alpha || strlen(token) >= 50 ){
                 token = strtok(NULL, " ");
                 is_alpha = true;
                 continue;
