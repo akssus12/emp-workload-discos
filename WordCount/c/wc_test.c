@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 
 #define MAX_UNIQUES 10000000
 
