@@ -28,21 +28,15 @@ int cmp_count(const void* p1, const void* p2) {
 int main(int argc, char** argv) {
     // Used to find the file size
     struct stat sb;
-
-    printf("debug 0\n");
     
     MPI_Init( &argc, &argv );
     int rank, size;
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
 
-    printf("debug 1\n");
-
     // Create the Datatype for MPI
     MPI_Datatype countMPI;
     int lenghts[2] = {1, Max_length};
-
-    printf("debug 2\n");
 
     MPI_Aint displacements[2];
     count dummy_count;
@@ -53,19 +47,13 @@ int main(int argc, char** argv) {
     displacements[0] = MPI_Aint_diff(displacements[0], base_address);
     displacements[1] = MPI_Aint_diff(displacements[1], base_address);
 
-    printf("debug 3\n");
-
     MPI_Datatype types[2] = { MPI_INT, MPI_CHAR };
     MPI_Type_create_struct(2, lenghts, displacements, types, &countMPI);
     MPI_Type_commit(&countMPI);
-
-    printf("debug 4\n");
     
     struct timeval start,end;
     double totaltime;
     int lines;
-
-    printf("debug 5\n");
 
     gettimeofday(&start, NULL);
 
@@ -80,22 +68,16 @@ int main(int argc, char** argv) {
     int total_words = 0;
     int received_num_words[2];
 
-    printf("debug 6\n");
-
     bool is_alpha = true;
     int i;
 
     char *start_string, *end_string; // for strchr()
-
-    printf("debug 7\n");
 
     // Allocate hash table.
     if (hcreate(MAX_UNIQUES) == 0) {
         fprintf(stderr, "error creating hash table\n");
         return 1;
     }
-
-    printf("debug 8\n");
 
     stat(argv[1], &sb);
 
@@ -106,15 +88,11 @@ int main(int argc, char** argv) {
         printf("Error opening data file\n");
     }
 
-    printf("debug 9\n");
-
     MPI_Barrier(MPI_COMM_WORLD);
 
     //char word[101]; // 100-char word plus NUL byte
     char* word = malloc(sb.st_size/2 + 1);
     memset(word, 0, sb.st_size/2+1);
-
-    printf("debug 10\n");
 
     fseek(fp, 0, SEEK_SET);
 
@@ -122,22 +100,14 @@ int main(int argc, char** argv) {
         fseek(fp, sb.st_size/2, SEEK_SET);
     }
 
-    printf("debug 11\n");
-
     fread(word, sb.st_size/2, 1, fp);
-
-    printf("debug 12\n");
 
     // Convert word to lower case in place.
     for (char* p = word; *p; p++) {
         *p = tolower(*p);
     }
 
-    printf("debug 13\n");
-
     start_string = end_string = (char *)word;
-
-    printf("debug 14\n");
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
@@ -145,8 +115,6 @@ int main(int argc, char** argv) {
         strncpy(string, start_string, size_string-1);
 
         char * token = strtok(string, " ");
-
-        printf("debug 15\n");
         while( token != NULL ){
             for ( i=0; token[i] != '\0'; i++ ){
                 if ( isalpha(token[i]) == 0 ) {
@@ -154,16 +122,12 @@ int main(int argc, char** argv) {
                     break;
                 }
             }
-
-            printf("debug 16\n");
             
             if ( !is_alpha || strlen(token) >= 50 ){
                 token = strtok(NULL, " ");
                 is_alpha = true;
                 continue;
             }
-
-            printf("debug 17\n");
 
             // Search for word in hash table.
             ENTRY item = {token, NULL};
@@ -200,15 +164,10 @@ int main(int argc, char** argv) {
                 num_words++;
                 token = strtok(NULL, " ");
             }
-
-            printf("debug 18\n");
         }
         free(string);
         start_string = end_string + 1;
-        printf("debug 19\n");
     }
-
-    printf("debug 20\n");
 
     // Iterate once to add counts to words list (not sort)
     for (i = 0; i < num_words; i++) {
@@ -221,23 +180,14 @@ int main(int argc, char** argv) {
         words[i].count = *(int*)found->data;
     }
 
-    printf("debug 21\n");
-
     MPI_Barrier(MPI_COMM_WORLD);
-
-    printf("debug 22\n");
 
     MPI_Gather(&num_words, 1, MPI_INT, received_num_words, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    printf("debug 23\n");
-
 
     MPI_Barrier(MPI_COMM_WORLD);
-
-    printf("debug 24\n");
     
     if(rank == 0){
-        printf("debug 25\n");
         // printf("received_num_words[0] : %d\n", received_num_words[0]);
         // printf("received_num_words[1] : %d\n", received_num_words[1]);
         total_words = received_num_words[0] + received_num_words[1];
@@ -245,18 +195,13 @@ int main(int argc, char** argv) {
         int counts[2] = {received_num_words[0], received_num_words[1]};
         int displs[2] = {0, received_num_words[0]};
         MPI_Gatherv(words, num_words, countMPI, receive_words, counts, displs, countMPI, 0, MPI_COMM_WORLD);
-        printf("debug 26\n");
 
     } else {
         MPI_Gatherv(words, num_words, countMPI, NULL, NULL, NULL, countMPI, 0, MPI_COMM_WORLD);
-        printf("debug 27\n");
     }
-
-    printf("debug 28\n");
 
 
     MPI_Barrier(MPI_COMM_WORLD);
-    printf("debug 29\n");
     
     if(rank==0){
         // for (int i=0 ; i<total_words; i++){
@@ -266,22 +211,18 @@ int main(int argc, char** argv) {
         // // final_words = calloc(total_words, sizeof(count));
         // // memcpy(final_words, words, num_words * sizeof(count));
 
-        printf("debug 30\n");
+        
         for (i=num_words; i<total_words; i++){
-            printf("debug 0\n");
             // Search for word in hash table.
             ENTRY item = {receive_words[i].word, NULL};
             ENTRY* found = hsearch(item, FIND);
             // printf("item : %s\n", item.key);
             if (found != NULL) {
-                printf("debug 31\n");
                 // Word already in table, increment count.
                 int* pn = (int*)found->data;
                 (*pn) += receive_words[i].count;
-                printf("debug 32\n");
 
             } else {
-                printf("debug 33\n");
                 // Word not in table, insert it with count 1.
                 item.key = strdup(receive_words[i].word); // need to copy word
                 if (item.key == NULL) {
@@ -307,24 +248,19 @@ int main(int argc, char** argv) {
                 strncpy(words[num_words].word, item.key, Max_length-1);
                 words[num_words].word[Max_length] = '\0';
                 num_words++;
-                printf("debug 34\n");
             }
         }    
 
         for (i = 0; i < num_words; i++) {
-            printf("debug 35\n");
-            ENTRY item = {words[i].word, NULL};
-            ENTRY* found = hsearch(item, FIND);
-            if (found == NULL) { // shouldn't happen
-                fprintf(stderr, "key not found: %s\n", item.key);
-                return 1;
-            }
-            words[i].count = *(int*)found->data;
-            printf("debug 36\n");
+                 ENTRY item = {words[i].word, NULL};
+                 ENTRY* found = hsearch(item, FIND);
+                 if (found == NULL) { // shouldn't happen
+                     fprintf(stderr, "key not found: %s\n", item.key);
+                     return 1;
+                 }
+                 words[i].count = *(int*)found->data;
         }
-        printf("debug 37\n");
         qsort(&words[0], num_words, sizeof(count), cmp_count);
-        printf("debug 38\n");
 
         // for(int i=0; i<num_words; i++){
         //     printf("%s, %d\n", words[i].word, words[i].count);
