@@ -177,6 +177,7 @@ int main(int argc, char** argv) {
     gettimeofday(&start, NULL);
 
     total_line = getTotalLine(filename);
+    total_line -= 1;
     line_size = getSpecificSize(filename, (int)total_line/2);
     printf("total_line : %d\n", total_line);
     printf("line_size : %lu\n", line_size);
@@ -195,11 +196,13 @@ int main(int argc, char** argv) {
 
         fseek(fp, 0, SEEK_SET);
 
+        fscanf(fp, "%d\n", &max);
+
         fread(word, line_size + 1, 1, fp);
         word[line_size + 1] = '\0';
 
         // find max_key
-        sscanf(word, "%d\n", &max);
+        // sscanf(word, "%d\n", &max);
         printf("(rank 0)max: %d\n", max);
 
         MPI_Send(&max, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
