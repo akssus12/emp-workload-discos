@@ -51,8 +51,7 @@ int main(int argc, char** argv) {
     MPI_Type_create_struct(2, lenghts, displacements, types, &countMPI);
     MPI_Type_commit(&countMPI);
     
-    struct timeval start,end, execution_1, mpi, file, execution_2;
-    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
+    
     int lines;
 
     gettimeofday(&start, NULL);
@@ -253,7 +252,7 @@ int main(int argc, char** argv) {
                  words[i].count = *(int*)found->data;
         }
         qsort(&words[0], num_words, sizeof(count), cmp_count);
-        
+
         gettimeofday(&execution_2, NULL);
         gettimeofday(&end, NULL);
         start_file = (((file.tv_usec - start.tv_usec) / 1.0e6 + file.tv_sec - start.tv_sec) * 1000) / 1000;
@@ -267,6 +266,7 @@ int main(int argc, char** argv) {
         printf("file_exe1 = %f seconds\n", file_exe1);
         printf("exe1_mpi = %f seconds\n", exe1_mpi);
         printf("mpi_exe2 = %f seconds\n", mpi_exe2);
+        printf("\nTotaltime = %f seconds\n", totaltime);
         
         free(receive_words);
         
