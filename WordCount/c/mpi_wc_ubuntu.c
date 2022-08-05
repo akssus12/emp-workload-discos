@@ -28,7 +28,8 @@ int cmp_count(const void* p1, const void* p2) {
 int main(int argc, char** argv) {
     // Used to find the file size
     struct stat sb;
-    
+    struct timeval start,end, execution_1, mpi, file, execution_2;
+    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
     MPI_Init( &argc, &argv );
     int rank, size;
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
