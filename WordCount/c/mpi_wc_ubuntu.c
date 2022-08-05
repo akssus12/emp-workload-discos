@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
     MPI_Type_create_struct(2, lenghts, displacements, types, &countMPI);
     MPI_Type_commit(&countMPI);
     
-    struct timeval start,end;
-    double totaltime;
+    struct timeval start,end, execution_1, mpi, file, execution_2;
+    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
     int lines;
 
     gettimeofday(&start, NULL);
@@ -90,7 +90,6 @@ int main(int argc, char** argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    //char word[101]; // 100-char word plus NUL byte
     char* word = malloc(sb.st_size/2 + 1);
     memset(word, 0, sb.st_size/2+1);
 
@@ -101,6 +100,8 @@ int main(int argc, char** argv) {
     }
 
     fread(word, sb.st_size/2, 1, fp);
+
+    gettimeofday(&file, NULL);
 
     // Convert word to lower case in place.
     for (char* p = word; *p; p++) {
@@ -180,6 +181,8 @@ int main(int argc, char** argv) {
         words[i].count = *(int*)found->data;
     }
 
+    gettimeofday(&execution_1, NULL);
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_Gather(&num_words, 1, MPI_INT, received_num_words, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -188,8 +191,6 @@ int main(int argc, char** argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     
     if(rank == 0){
-        // printf("received_num_words[0] : %d\n", received_num_words[0]);
-        // printf("received_num_words[1] : %d\n", received_num_words[1]);
         total_words = received_num_words[0] + received_num_words[1];
         receive_words = calloc(total_words, sizeof(count));
         int counts[2] = {received_num_words[0], received_num_words[1]};
@@ -202,21 +203,14 @@ int main(int argc, char** argv) {
 
 
     MPI_Barrier(MPI_COMM_WORLD);
+
+    gettimeofday(&mpi, NULL);
     
     if(rank==0){
-        // for (int i=0 ; i<total_words; i++){
-        //     printf("%s %d\n", receive_words[i].word, receive_words[i].count);
-        // }
-        // printf("total num : %d\n", total_words);
-        // // final_words = calloc(total_words, sizeof(count));
-        // // memcpy(final_words, words, num_words * sizeof(count));
-
-        
         for (i=num_words; i<total_words; i++){
             // Search for word in hash table.
             ENTRY item = {receive_words[i].word, NULL};
             ENTRY* found = hsearch(item, FIND);
-            // printf("item : %s\n", item.key);
             if (found != NULL) {
                 // Word already in table, increment count.
                 int* pn = (int*)found->data;
@@ -243,8 +237,6 @@ int main(int argc, char** argv) {
                 }
 
                 // And add to words list for iterating.
-                // words[num_words].word = item.key;
-                // num_words++;
                 strncpy(words[num_words].word, item.key, Max_length-1);
                 words[num_words].word[Max_length] = '\0';
                 num_words++;
@@ -261,16 +253,21 @@ int main(int argc, char** argv) {
                  words[i].count = *(int*)found->data;
         }
         qsort(&words[0], num_words, sizeof(count), cmp_count);
-
-        // for(int i=0; i<num_words; i++){
-        //     printf("%s, %d\n", words[i].word, words[i].count);
-        // }
-
+        
+        gettimeofday(&execution_2, NULL);
         gettimeofday(&end, NULL);
+        start_file = (((file.tv_usec - start.tv_usec) / 1.0e6 + file.tv_sec - start.tv_sec) * 1000) / 1000;
+        file_exe1 = (((execution_1.tv_usec - file.tv_usec) / 1.0e6 + execution_1.tv_sec - file.tv_sec) * 1000) / 1000;
+        exe1_mpi = (((mpi.tv_usec - execution_1.tv_usec) / 1.0e6 + mpi.tv_sec - execution_1.tv_sec) * 1000) / 1000;
+        mpi_exe2 = (((execution_2.tv_usec - mpi.tv_usec) / 1.0e6 + execution_2.tv_sec - mpi.tv_sec) * 1000) / 1000;
         totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
 
         printf("num_words : %d\n", num_words);
-        printf("\nTotaltime = %f seconds\n", totaltime);
+        printf("start_file = %f seconds\n", start_file);
+        printf("file_exe1 = %f seconds\n", file_exe1);
+        printf("exe1_mpi = %f seconds\n", exe1_mpi);
+        printf("mpi_exe2 = %f seconds\n", mpi_exe2);
+        
         free(receive_words);
         
     }   

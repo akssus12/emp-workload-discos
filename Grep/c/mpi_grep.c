@@ -62,8 +62,8 @@ int main(int argc, char** argv) {
     MPI_Comm_size( MPI_COMM_WORLD, &size );
 
     struct stat sb;
-    struct timeval start, end;
-    double totaltime;
+    struct timeval start, end, execution_1, mpi, file, execution_2;
+    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
     char filename[256];
     char target[256];
     int ch = 0;
@@ -85,8 +85,6 @@ int main(int argc, char** argv) {
 
     total_line = getTotalLine(filename);
     line_size = getSpecificSize(filename, (int)total_line/2);
-    printf("total_line : %d\n", total_line);
-    printf("line_size : %lu\n", line_size);
 
     FILE *fp;
 
@@ -112,9 +110,7 @@ int main(int argc, char** argv) {
         word[sb.st_size - line_size + 1] = '\0';
     }
 
-    printf("line_size : %lu\n", line_size);
-    printf("sb.st_size : %lu\n", sb.st_size);
-    printf("word size : %lu\n", malloc_usable_size(word));
+    gettimeofday(&file, NULL);
 
     // Convert word to lower case in place.
     for (char* p = word; *p; p++) {
@@ -150,6 +146,7 @@ int main(int argc, char** argv) {
         free(string);
         start_string = end_string + 1;
     }
+    gettimeofday(&execution_1, NULL);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -168,21 +165,37 @@ int main(int argc, char** argv) {
         MPI_Send(array_line, num, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    if (rank == 0){
-        for (int i=0; i<num-1; i++){
-            printf("%d\n", array_line[i]);
-        }
+    gettimeofday(&mpi, NULL);
 
-        for (int i=0; i<received_num-1; i++){
-            printf("%d\n", total_line/2 + received_array_line[i]);
-        }
+    if (rank == 0){
+        // Uncomment it if you want to print the target line
+
+        // for (int i=0; i<num-1; i++){
+        //     printf("%d\n", array_line[i]);
+        // }
+
+        // for (int i=0; i<received_num-1; i++){
+        //     printf("%d\n", total_line/2 + received_array_line[i]);
+        // }
         free(received_array_line);
     }
-
+    
+    gettimeofday(&execution_2, NULL);
     gettimeofday(&end, NULL);
-    totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
 
-    printf("\nTotaltime = %f seconds\n", totaltime);
+    if (rank == 0){
+        start_file = (((file.tv_usec - start.tv_usec) / 1.0e6 + file.tv_sec - start.tv_sec) * 1000) / 1000;
+        file_exe1 = (((execution_1.tv_usec - file.tv_usec) / 1.0e6 + execution_1.tv_sec - file.tv_sec) * 1000) / 1000;
+        exe1_mpi = (((mpi.tv_usec - execution_1.tv_usec) / 1.0e6 + mpi.tv_sec - execution_1.tv_sec) * 1000) / 1000;
+        mpi_exe2 = (((execution_2.tv_usec - mpi.tv_usec) / 1.0e6 + execution_2.tv_sec - mpi.tv_sec) * 1000) / 1000;
+        totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
+
+        printf("start_file = %f seconds\n", start_file);
+        printf("file_exe1 = %f seconds\n", file_exe1);
+        printf("exe1_mpi = %f seconds\n", exe1_mpi);
+        printf("mpi_exe2 = %f seconds\n", mpi_exe2);
+        printf("\nTotaltime = %f seconds\n", totaltime);
+    }
 
     fclose(fp);
     free(word);

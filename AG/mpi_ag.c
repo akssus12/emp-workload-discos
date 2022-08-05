@@ -115,9 +115,11 @@ void create(int key, int data){
     new_node->next = NULL;
     // If it is first node
     if (list_node[key].num == 0){
+        //Init the start
         list_node[key].next = new_node;
         list_node[key].num++;
     } else {
+        //Insert the node in the end
         node = list_node[key].next;
         while(node->next != NULL){
             node = node->next;
@@ -190,7 +192,7 @@ int main(int argc, char** argv) {
         fread(word, line_size + 1, 1, fp);
         word[line_size + 1] = '\0';
 
-        MPI_Send(&max, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        // In ag workload, max is fixed to 1. so, doesn't need to mpi operation
 
     } else {
         word = malloc(sb.st_size - line_size + 1);
@@ -202,10 +204,8 @@ int main(int argc, char** argv) {
         fread(word, sb.st_size - line_size, 1, fp);
         word[sb.st_size - line_size + 1] = '\0';
 
-        int received_max;
-        MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        max = received_max;
     }
+    max = 1;
 
     gettimeofday(&file, NULL);
 
@@ -217,6 +217,7 @@ int main(int argc, char** argv) {
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
+        key = 0;
         create(key, value);
 
         token = strtok(NULL, "\n");
@@ -246,7 +247,6 @@ int main(int argc, char** argv) {
                 sum = received_sum_array[i];
 
                 // Uncomment it if you want to print the result
-
                 // printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
             }
         }
