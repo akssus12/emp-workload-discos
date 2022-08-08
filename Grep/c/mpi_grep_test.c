@@ -77,13 +77,13 @@ int main(int argc, char** argv) {
     char * start_string, *end_string; // for strchr()
 
     strcpy(filename, argv[1]);
-    strcpy(target, argv[2]);
+    strcpy(target, argv[3]);
 
     gettimeofday(&start, NULL);
 
     stat(argv[1], &sb);
 
-    total_line = atoi(argv[3]);
+    total_line = atoi(argv[2]);
     line_size = getSpecificSize(filename, (int)total_line/2);
 
     FILE *fp;
