@@ -8,25 +8,6 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-int getTotalLine(char *name){
-    FILE *ptr;
-    int line=0;
-    char c;
-
-    ptr=fopen(name,"r");
-    if (ptr == NULL) {
-        printf("Error opening data file\n");
-    }
-
-    while((c=fgetc(ptr))!=EOF)
-        if(c=='\n') line++;
-
-    fseek(ptr, 0, SEEK_SET);
-    fclose(ptr);
-
-    return(line);
-}
-
 long getSpecificSize(char *name, int target_line){
     FILE *ptr;
     long size=0;
@@ -168,7 +149,7 @@ int main(int argc, char** argv) {
 
     gettimeofday(&start, NULL);
 
-    total_line = getTotalLine(filename);
+    total_line = atoi(argv[2]);
     total_line -= 1;
     line_size = getSpecificSize(filename, (int)total_line/2);
 
