@@ -78,11 +78,14 @@ void create(int key, int data){
     } else {
         //Insert the node in the end
         // printf("insert node! \n");
-        node = list_node[key].next;
-        while(node->next != NULL){
-            node = node->next;
-        }
-        node->next = new_node;
+        // node = list_node[key].next;
+        // while(node->next != NULL){
+        //     node = node->next;
+        // }
+        // node->next = new_node;
+        list_node[key].next = new_node;
+        new_node->next = node;
+        
         list_node[key].num++;
     }
 }
