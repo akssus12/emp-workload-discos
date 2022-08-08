@@ -8,4 +8,4 @@
 line=$(wc -l < $2)
 echo "${line}"
 
-mpirun -np $1 ./mpi_grep -hostfile ./my_hostfile $2 $line $3
+mpirun -np $1 -hostfile ./my_hostfile ./mpi_grep $2 $line $3

@@ -7,4 +7,4 @@
 line=$(wc -l < $2)
 echo "${line}"
 
-mpirun -np $1 ./mpi_gag -hostfile ./my_hostfile $2 $line
+mpirun -np $1 -hostfile ./my_hostfile ./mpi_gag $2 $line

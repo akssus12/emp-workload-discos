@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
         char * token = strtok(string, " ");
         while( token != NULL ){
             if(strcmp(token, target) == 0){
-                printf("lines : %d\n", num_lines);
+                // printf("lines : %d\n", num_lines);
                 break;
             } 
             token = strtok(NULL, " ");
