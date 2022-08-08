@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
     stat(argv[1], &sb);
 
-    total_line = getTotalLine(filename);
+    total_line = atoi(argv[3]);
     line_size = getSpecificSize(filename, (int)total_line/2);
 
     FILE *fp;
