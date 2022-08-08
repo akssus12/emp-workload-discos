@@ -12,7 +12,7 @@ mpi_wc: mpi_wc.c
 	mpicc mpi_wc.c -o mpi_wc
 
 mpi_wc_test: mpi_wc_test
-	mpicc mpi_wc_test -o mpi_wc_test
+	mpicc mpi_wc_test.c -o mpi_wc_test
 
 clean:
 	rm wc
