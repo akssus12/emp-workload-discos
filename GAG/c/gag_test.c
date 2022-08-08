@@ -71,21 +71,17 @@ void create(int key, int data){
     // printf("addr of new_node's pointer : %p\n", new_node);
     // If it is first node
     if (list_node[key].num == 0){
-        //Init the start
+        // Init the start
         // printf("first node! \n");
         list_node[key].next = new_node;
         list_node[key].num++;
     } else {
-        //Insert the node in the end
+        // Insert the node in the end
         // printf("insert node! \n");
-        // node = list_node[key].next;
-        // while(node->next != NULL){
-        //     node = node->next;
-        // }
-        // node->next = new_node;
+        node = list_node[key].next;
         list_node[key].next = new_node;
         new_node->next = node;
-        
+
         list_node[key].num++;
     }
 }
