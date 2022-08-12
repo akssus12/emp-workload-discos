@@ -105,13 +105,15 @@ int main(int argc, char** argv) {
     memset(word, 0, sb.st_size/2 + 1);
     char* tmp_string;
     int i;
-    // If it is not eof but a specific number of lines
-    for (i=0; i%2 == divider && feof(fp) == 0; i++){
-        // If not eof and fgets fails -> buffer is out of mem. 
-        if (fgets(word+strlen(word), sizeof(word), fp) == NULL && feof(fp) == 0) {
-            printf("out of buffer(word), Increase buffer size using realloc()\n");
-            word = (char*)realloc(word, sizeof(word)+ONEGB);
-            fgets(word+strlen(word), sizeof(word), fp);          
+    // If it is not EOF but a specific number of lines
+    for (i=0; i%2 == divider && !feof(fp); i++){
+        // If not EOF and fgets fails -> buffer is out of mem. 
+        fgets(word+strlen(word), sizeof(word), fp);
+        printf("%s\n", word);
+        // if (fgets(word+strlen(word), sizeof(word), fp) == NULL && !feof(fp)) {
+        //     printf("out of buffer(word), Increase buffer size using realloc()\n");
+        //     word = (char*)realloc(word, sizeof(word)+ONEGB);
+        //     fgets(word+strlen(word), sizeof(word), fp);          
         }
     }
 
