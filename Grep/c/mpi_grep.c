@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0){
         MPI_Recv(received_array_line, received_num, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);

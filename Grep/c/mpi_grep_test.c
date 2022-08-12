@@ -8,58 +8,41 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-int getTotalLine(char *name){
-    FILE *ptr;
-    int line=0;
-    char c;
+// long getSpecificSize(char *name, int target_line){
+//     FILE *ptr;
+//     long size=0;
+//     int line=0;
+//     char c;
 
-    ptr=fopen(name,"r");
-    if (ptr == NULL) {
-        printf("Error opening data file\n");
-    }
-
-    while((c=fgetc(ptr))!=EOF)
-        if(c=='\n') line++;
-
-    fseek(ptr, 0, SEEK_SET);
-    fclose(ptr);
-
-    return(line);
-}
-
-long getSpecificSize(char *name, int target_line){
-    FILE *ptr;
-    long size=0;
-    int line=0;
-    char c;
-
-    ptr=fopen(name,"r");
-    if (ptr == NULL) {
-        printf("Error opening data file\n");
-    }
+//     ptr=fopen(name,"r");
+//     if (ptr == NULL) {
+//         printf("Error opening data file\n");
+//     }
     
-    while((c=fgetc(ptr))!=EOF){
-        if( line != target_line ) {
-            size ++;
-            if( c == '\n') {
-                line ++;
-            }
-        } else {
-            break;
-        }
-    }
+//     while((c=fgetc(ptr))!=EOF){
+//         if( line != target_line ) {
+//             size ++;
+//             if( c == '\n') {
+//                 line ++;
+//             }
+//         } else {
+//             break;
+//         }
+//     }
 
-    fseek(ptr, 0, SEEK_SET);
-    fclose(ptr);
+//     fseek(ptr, 0, SEEK_SET);
+//     fclose(ptr);
 
-    return(size);
-}
+//     return(size);
+// }
 
 int main(int argc, char** argv) {
     MPI_Init( &argc, &argv );
     int rank, size;
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
+
+    const int ONEGB = 1024 * 1024 * 1024;
 
     struct stat sb;
     struct timeval start, end, execution_1, mpi, file, execution_2;
@@ -70,9 +53,10 @@ int main(int argc, char** argv) {
     int num_lines = 0;
     int num = 1;
     int received_num;
+    int divider = 0;
     int *received_array_line;
     int total_line;
-    long line_size;
+    // long line_size;
     char * word;
     char * start_string, *end_string; // for strchr()
 
@@ -84,7 +68,7 @@ int main(int argc, char** argv) {
     stat(argv[1], &sb);
 
     total_line = atoi(argv[2]);
-    line_size = getSpecificSize(filename, (int)total_line/2);
+    // line_size = getSpecificSize(filename, (int)total_line/2);
 
     FILE *fp;
 
@@ -93,22 +77,46 @@ int main(int argc, char** argv) {
         printf("Error opening data file\n");
     }
 
-    if (rank == 0) {
-        word = malloc(line_size + 1);
-        memset(word, 0, line_size + 1);
+    // if (rank == 0) {
+    //     word = malloc(line_size + 1);
+    //     memset(word, 0, line_size + 1);
     
-        fread(word, line_size, 1, fp);
-        word[line_size + 1] = '\0';
+    //     fread(word, line_size, 1, fp);
+    //     word[line_size + 1] = '\0';
 
+    // } else {
+    //     word = malloc(sb.st_size - line_size + 1);
+    //     memset(word, 0, sb.st_size - line_size + 1);
+
+    //     fseek(fp, line_size, SEEK_SET);
+
+    //     fread(word, sb.st_size - line_size, 1, fp);
+    //     word[sb.st_size - line_size + 1] = '\0';
+    // }
+
+    if (rank == 0) {
+        divider = 0;
     } else {
-        word = malloc(sb.st_size - line_size + 1);
-        memset(word, 0, sb.st_size - line_size + 1);
-
-        fseek(fp, line_size, SEEK_SET);
-
-        fread(word, sb.st_size - line_size, 1, fp);
-        word[sb.st_size - line_size + 1] = '\0';
+        divider = 1;
     }
+
+    fseek(fp, 0, SEEK_SET);
+    word = malloc(sb.st_size/2 + 1);
+    memset(word, 0, sb.st_size/2 + 1);
+    char* tmp_string;
+    int i;
+    // If it is not eof but a specific number of lines
+    for (i=0; i%2 == divider && feof(fp) == 0; i++){
+        // If not eof and fgets fails -> buffer is out of mem. 
+        if (fgets(word+strlen(word), sizeof(word), fp) == NULL && feof(fp) == 0) {
+            printf("out of buffer(word), Increase buffer size using realloc()\n");
+            word = (char*)realloc(word, sizeof(word)+ONEGB);
+            fgets(word+strlen(word), sizeof(word), fp);          
+        }
+    }
+
+
+
 
     gettimeofday(&file, NULL);
 
@@ -148,8 +156,6 @@ int main(int argc, char** argv) {
     }
     gettimeofday(&execution_1, NULL);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     if (rank == 0){
         MPI_Recv(&received_num, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         received_array_line = calloc(received_num, sizeof(int));
@@ -157,7 +163,7 @@ int main(int argc, char** argv) {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0){
         MPI_Recv(received_array_line, received_num, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
