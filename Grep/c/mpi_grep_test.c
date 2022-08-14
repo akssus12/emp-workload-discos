@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
 
-    const int ONEGB = 1024 * 1024 * 1024;
+    const long ONEGB = 1024 * 1024 * 1024;
 
     struct stat sb;
     struct timeval start, end, execution_1, mpi, file, execution_2;
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
         char * token = strtok(string, " ");
         while( token != NULL ){
             if(strcmp(token, target) == 0){
-                // printf("lines : %d\n", num_lines);
+                printf("lines : %d\n", num_lines);
                 array_line[num-1] = num_lines;
                 num ++;
                 if( NULL == (array_line = (int*)realloc(array_line, sizeof(int)*num)) ){
@@ -201,13 +201,13 @@ int main(int argc, char** argv) {
     if (rank == 0){
         // Uncomment it if you want to print the target line
 
-        // for (int i=0; i<num-1; i++){
-        //     printf("%d\n", array_line[i]);
-        // }
+        for (int i=0; i<num-1; i++){
+            printf("%d\n", array_line[i]);
+        }
 
-        // for (int i=0; i<received_num-1; i++){
-        //     printf("%d\n", total_line/2 + received_array_line[i]);
-        // }
+        for (int i=0; i<received_num-1; i++){
+            printf("%d\n", total_line/2 + received_array_line[i]);
+        }
         free(received_array_line);
     }
     
@@ -233,6 +233,8 @@ int main(int argc, char** argv) {
     fclose(fp);
     free(word);
     free(array_line);
+
+    printf("debug 9\n");
     
     MPI_Finalize();
 
