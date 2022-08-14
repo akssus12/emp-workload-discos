@@ -94,11 +94,15 @@ int main(int argc, char** argv) {
     //     word[sb.st_size - line_size + 1] = '\0';
     // }
 
+    printf("debug 1\n");
+
     if (rank == 0) {
         divider = 0;
     } else {
         divider = 1;
     }
+
+    printf("debug 2\n");
 
     fseek(fp, 0, SEEK_SET);
     word = malloc(sb.st_size/2 + 1);
@@ -117,8 +121,7 @@ int main(int argc, char** argv) {
                 fgets(word+strlen(word), sb.st_size/2, fp);          
             }
         } else {
-            while(1) {
-                fgets(tmp_string, 1024, fp);
+            while(fgets(tmp_string, 1024, fp) != NULL) {
                 if (strchr(tmp_string, '\n') != NULL){
                     break;
                 }
@@ -126,7 +129,11 @@ int main(int argc, char** argv) {
         }
     }
 
-    printf("%s\n", word);
+    printf("debug 3\n");
+
+    if (rank == 0){
+        printf("%s\n", word);
+    }
 
     gettimeofday(&file, NULL);
 
@@ -134,6 +141,8 @@ int main(int argc, char** argv) {
     for (char* p = word; *p; p++) {
         *p = tolower(*p);
     }
+
+    printf("debug 4\n");
 
     int * array_line = calloc(num, sizeof(int));
     int * backup_ptr = array_line;
@@ -164,6 +173,8 @@ int main(int argc, char** argv) {
         free(string);
         start_string = end_string + 1;
     }
+
+    printf("debug 5\n");
     gettimeofday(&execution_1, NULL);
 
     if (rank == 0){
@@ -172,6 +183,8 @@ int main(int argc, char** argv) {
     } else {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
+
+    printf("debug 6\n");
 
     // MPI_Barrier(MPI_COMM_WORLD);
 
@@ -182,6 +195,8 @@ int main(int argc, char** argv) {
     }
 
     gettimeofday(&mpi, NULL);
+
+    printf("debug 7\n");
 
     if (rank == 0){
         // Uncomment it if you want to print the target line
@@ -212,6 +227,8 @@ int main(int argc, char** argv) {
         printf("mpi_exe2 = %f seconds\n", mpi_exe2);
         printf("\nTotaltime = %f seconds\n", totaltime);
     }
+
+    printf("debug 8\n");
 
     fclose(fp);
     free(word);
