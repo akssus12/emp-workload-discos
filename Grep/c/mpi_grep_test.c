@@ -108,13 +108,16 @@ int main(int argc, char** argv) {
     int i;
     // If it is not EOF but a specific number of lines
     for (i=0; i<total_line; i++){
-        // If not EOF and fgets fails -> buffer is out of mem. 
-        if (fgets(word+strlen(word), sb.st_size/2, fp) == NULL && !feof(fp)) {
-            printf("out of buffer(word), Increase buffer size using realloc()\n");
-            word = (char*)realloc(word, malloc_size+ONEGB);
-            malloc_size += ONEGB;
-            fgets(word+strlen(word), sb.st_size/2, fp);          
+        if (i%2 == divider){
+            // If not EOF and fgets fails -> buffer is out of mem. 
+            if (fgets(word+strlen(word), sb.st_size/2, fp) == NULL && !feof(fp)) {
+                printf("out of buffer(word), Increase buffer size using realloc()\n");
+                word = (char*)realloc(word, malloc_size+ONEGB);
+                malloc_size += ONEGB;
+                fgets(word+strlen(word), sb.st_size/2, fp);          
+            }
         }
+        
     }
 
     gettimeofday(&file, NULL);
