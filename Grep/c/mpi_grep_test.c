@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     word = malloc(sb.st_size/2 + 1);
     memset(word, 0, sb.st_size/2 + 1);
     malloc_size = sb.st_size/2 + 1;
-    // char* tmp_string;
+    char* tmp_string;
     int i;
     // If it is not EOF but a specific number of lines
     for (i=0; i<total_line; i++){
@@ -116,6 +116,8 @@ int main(int argc, char** argv) {
                 malloc_size += ONEGB;
                 fgets(word+strlen(word), sb.st_size/2, fp);          
             }
+        } else {
+            fscanf(fp, "%s\n", tmp_string);
         }
         
     }
