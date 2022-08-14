@@ -118,13 +118,12 @@ int main(int argc, char** argv) {
             }
         } else {
             while(1) {
-                fgets(tmp_string, 1204, fp);
+                fgets(tmp_string, 1024, fp);
                 if (strchr(tmp_string, '\n') != NULL){
                     break;
                 }
             }
         }
-        
     }
 
     printf("%s\n", word);
