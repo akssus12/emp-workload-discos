@@ -179,6 +179,15 @@ int main(int argc, char** argv) {
 
     if (rank == 0){
         MPI_Recv(&received_num, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        if (received_num == 0) {
+            fclose(fp) ;
+            free(word);
+            free(array_line);
+
+            MPI_Finalize();
+
+            return 0;
+        }
         received_array_line = calloc(received_num, sizeof(int));
     } else {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
@@ -230,7 +239,7 @@ int main(int argc, char** argv) {
 
     printf("debug 8\n");
 
-    fclose(fp);
+    fclose(fp) ;
     free(word);
     free(array_line);
 
