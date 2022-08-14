@@ -120,6 +120,8 @@ int main(int argc, char** argv) {
         
     }
 
+    printf("%s\n", word);
+
     gettimeofday(&file, NULL);
 
     // Convert word to lower case in place.
