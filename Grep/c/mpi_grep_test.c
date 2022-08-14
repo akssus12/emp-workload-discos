@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     int divider = 0;
     int *received_array_line;
     int total_line;
-    // long line_size;
+    long malloc_size;
     char * word;
     char * start_string, *end_string; // for strchr()
 
@@ -103,15 +103,17 @@ int main(int argc, char** argv) {
     fseek(fp, 0, SEEK_SET);
     word = malloc(sb.st_size/2 + 1);
     memset(word, 0, sb.st_size/2 + 1);
+    malloc_size = sb.st_size/2 + 1;
     // char* tmp_string;
     int i;
     // If it is not EOF but a specific number of lines
     for (i=0; i<total_line; i++){
         // If not EOF and fgets fails -> buffer is out of mem. 
-        if (fgets(word+strlen(word), sizeof(word), fp) == NULL && !feof(fp)) {
+        if (fgets(word+strlen(word), sb.st_size/2, fp) == NULL && !feof(fp)) {
             printf("out of buffer(word), Increase buffer size using realloc()\n");
-            word = (char*)realloc(word, sizeof(word)+ONEGB);
-            fgets(word+strlen(word), sizeof(word), fp);          
+            word = (char*)realloc(word, malloc_size+ONEGB);
+            malloc_size += ONEGB;
+            fgets(word+strlen(word), sb.st_size/2, fp);          
         }
     }
 
