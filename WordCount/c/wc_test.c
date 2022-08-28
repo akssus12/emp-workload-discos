@@ -78,7 +78,6 @@ int main(int argc, char** argv) {
 
     start_string = end_string = (char *)word;
     char *string, *free_string, *token;
-    int j;
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
@@ -89,8 +88,8 @@ int main(int argc, char** argv) {
         // printf("%d thread's string is \"%s\" \n", i, string);
 
         while(( token = strtok_r(string, " ", &string) )){
-            for ( j=0; token[j] != '\0'; j++ ){
-                if ( isalpha(token[j]) == 0 ) {
+            for ( i=0; token[i] != '\0'; i++ ){
+                if ( isalpha(token[i]) == 0 ) {
                     is_alpha = false;
                     break;
                 }
