@@ -42,10 +42,8 @@ int main(int argc, char** argv) {
     int NUM_THREADS = 2;
 
     double start_time, file_time, tolower_time, search_time, end_time; 
-    double totaltime;
     char filename[256];
     char target[256];
-    int ch = 0;
     int i, j;
     
     strcpy(filename, argv[1]);
@@ -56,6 +54,7 @@ int main(int argc, char** argv) {
     start_time = omp_get_wtime();
     //////////////////////////////////// READ FILE ////////////////////////////////////
     struct stat sb;
+    stat(argv[1], &sb);
     FILE *fp;
     char ** array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
 
@@ -105,12 +104,12 @@ int main(int argc, char** argv) {
     char * start_string, *end_string, *token; // for strchr()
     int num[2] = {1, 1};
     int num_lines = 0;
-    int ** array_lines = (int **) calloc(num, sizeof(int));
+    int ** array_lines = (int **) calloc(NUM_THREADS, sizeof(int*));
 
     #pragma omp parallel shared(array_word, array_lines, num) private(i, num_lines, token)
     {
         i = omp_get_thread_num();
-        int * array_lines[i] = calloc(num[i], sizeof(int));
+        array_lines[i] = calloc(num[i], sizeof(int));
         int * backup_ptr = array_lines[i];
 
         start_string = end_string = (char *)array_word[i];
@@ -121,10 +120,10 @@ int main(int argc, char** argv) {
             strncpy(string, start_string, size_string-1);
             num_lines++;
 
-            while( token = strtok_r(string, " ", &string) ){
+            while((token = strtok_r(string, " ", &string))){
                 if(strcmp(token, target) == 0){
                     // printf("lines : %d\n", num_lines);
-                    array_lines[i][num-1] = num_lines;
+                    array_lines[i][num[i]-1] = num_lines;
                     num[i] ++;
                     if((array_lines[i] = (int*)realloc(array_lines[i], sizeof(int)*num[i])) == NULL){
                         free(backup_ptr);
@@ -147,7 +146,7 @@ int main(int argc, char** argv) {
     for (i = 0; i<NUM_THREADS; i++){
         for (j = 0; j < num[i]; j++){
             // Uncomment it if you want to print the target line
-            printf("%d\n", array_lines[i][j]);
+            // printf("%d\n", array_lines[i][j]);
         }
     }
     end_time = omp_get_wtime();
