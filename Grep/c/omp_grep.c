@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include <omp.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -41,10 +42,8 @@ int main(int argc, char** argv) {
     int NUM_THREADS = 2;
 
     double start_time, file_time, tolower_time, search_time, end_time; 
-    double totaltime;
     char filename[256];
     char target[256];
-    int ch = 0;
     int i, j;
     
     strcpy(filename, argv[1]);
@@ -105,7 +104,7 @@ int main(int argc, char** argv) {
     char * start_string, *end_string, *token; // for strchr()
     int num[2] = {1, 1};
     int num_lines = 0;
-    int ** array_lines = (int **) calloc(num, sizeof(int));
+    int ** array_lines = (int **) calloc(NUM_THREADS, sizeof(int*));
 
     #pragma omp parallel shared(array_word, array_lines, num) private(i, num_lines, token)
     {
@@ -121,7 +120,7 @@ int main(int argc, char** argv) {
             strncpy(string, start_string, size_string-1);
             num_lines++;
 
-            while( token = strtok_r(string, " ", &string) ){
+            while((token = strtok_r(string, " ", &string))){
                 if(strcmp(token, target) == 0){
                     // printf("lines : %d\n", num_lines);
                     array_lines[i][num-1] = num_lines;

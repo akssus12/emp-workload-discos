@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
         strncpy(string, start_string, size_string-1);
         num_lines++;
 
-        while( token = strtok_r(string, " ", &string) ){
+        while((token = strtok_r(string, " ", &string))){
             if(strcmp(token, target) == 0){
                 // printf("lines : %d\n", num_lines);
                 array_line[num-1] = num_lines;

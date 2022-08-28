@@ -49,7 +49,6 @@ int main(int argc, char** argv) {
     double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
     char filename[256];
     char target[256];
-    int ch = 0;
     int num_lines = 0;
     int num = 1;
     int received_num;

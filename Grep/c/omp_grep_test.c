@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include <omp.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 

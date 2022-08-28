@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     //fscanf(fp,"%100s", word);
     fread(word, sb.st_size+1, 1, fp);
     word[sb.st_size+1] = '\0';
-    
+
     fclose(fp);
 
     gettimeofday(&file_t, NULL);
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     printf("Complete converting to lowercase\n");
 
     //////////////////////////////////// SEARCHING TARGET WORD ////////////////////////////////////
-    char * start_string, *end_string; // for strchr()
+    char * start_string, *end_string, *token; // for strchr()
     start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
@@ -62,14 +62,12 @@ int main(int argc, char** argv) {
         strncpy(string, start_string, size_string-1);
         num_lines++;
 
-        char * token = strtok(string, " ");
-        while( token != NULL ){
+        while( (token = strtok_r(string, " ", &string)) ){
             if(strcmp(token, target) == 0){
                 // Uncomment it if you want to print the target line
                 // printf("lines : %d\n", num_lines);
                 break;
             } 
-            token = strtok(NULL, " ");
         }
         free(string);
         start_string = end_string + 1;
