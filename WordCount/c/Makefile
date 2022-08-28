@@ -26,19 +26,19 @@ clean:
 	rm -f *.out
 
 $(TARGET) : $(OBJS)
-	$(CC) -o $@ $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
 $(TARGET_TEST) : $(OBJS_TEST)
-	$(CC) -o $@ $(OBJS_TEST)
+	$(CC) $(CFLAGS) -o $@ $(OBJS_TEST)
 
 $(TARGET_OMP) : $(OBJS_OMP)
-	$(CC) -fopenmp -o $@ $(OBJS_OMP)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP)
 
 $(TARGET_OMP_TEST) : $(OBJS_OMP_TEST)
-	$(CC) -fopenmp -o $@ $(OBJS_OMP_TEST)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP_TEST)
 
 $(TARGET_MPI) : $(OBJS_MPI)
-	mpicc -o $@ $(OBJS_MPI)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI)
 
 $(TARGET_MPI_TEST) : $(OBJS_MPI_TEST)
-	mpicc -o $@ $(OBJS_MPI_TEST)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI_TEST)
