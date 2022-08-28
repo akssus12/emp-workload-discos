@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
     double hashing_migrate = (((migrate_time.tv_usec - hashing_time.tv_usec) / 1.0e6 + migrate_time.tv_sec - hashing_time.tv_sec) * 1000) / 1000;
     double migrate_qsort = (((qsort_time.tv_usec - migrate_time.tv_usec) / 1.0e6 + qsort_time.tv_sec - migrate_time.tv_sec) * 1000) / 1000;
 
-    printf("total_words : %d\n", num_words);
+    printf("total_words : %d\n", hash_table->count);
     printf("\nTotaltime = %f seconds\n", totaltime);
     printf("\nstart_file = %f seconds\n", start_file);
     printf("\nfile_tolower = %f seconds\n", file_tolower);

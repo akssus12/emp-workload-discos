@@ -1,22 +1,22 @@
 CC=gcc
 CFLAGS=-g -Wall
 
-OBJS=wc.c ../htable.h
+OBJS=wc.c
 TARGET=wc.out
 
-OBJS_TEST=wc_test.c ../htable.h
+OBJS_TEST=wc_test.c
 TARGET_TEST=wc_test.out
 
-OBJS_OMP=omp_wc.c ../htable.h
+OBJS_OMP=omp_wc.c
 TARGET_OMP=omp_wc.out
 
-OBJS_OMP_TEST=omp_wc_test.c ../htable.h
+OBJS_OMP_TEST=omp_wc_test.c
 TARGET_OMP_TEST=omp_wc_test.out
 
-OBJS_MPI=mpi_wc.c ../htable.h
+OBJS_MPI=mpi_wc.c
 TARGET_MPI=mpi_wc.out
 
-OBJS_MPI_TEST=mpi_wc_test.c ../htable.h
+OBJS_MPI_TEST=mpi_wc_test.c
 TARGET_MPI_TEST=mpi_wc_test.out
 
 all: $(TARGET) $(TARGET_TEST) $(TARGET_MPI) $(TARGET_MPI_TEST) $(TARGET_OMP) $(TARGET_OMP_TEST)
