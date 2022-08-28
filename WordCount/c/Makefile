@@ -1,24 +1,44 @@
-all: wc wc_test mpi_wc mpi_wc_test omp_wc_test
+CC=gcc
+CFLAGS=-g -Wall
 
-CC = gcc
+OBJS=wc.c ../htable.h
+TARGET=wc.out
 
-wc: wc.c
-	gcc wc.c -o wc
+OBJS_TEST=wc_test.c ../htable.h
+TARGET_TEST=wc_test.out
 
-wc_test: wc_test.c
-	gcc wc_test.c -o wc_test
+OBJS_OMP=omp_wc.c ../htable.h
+TARGET_OMP=omp_wc.out
 
-mpi_wc: mpi_wc.c
-	mpicc mpi_wc.c -o mpi_wc
+OBJS_OMP_TEST=omp_wc_test.c ../htable.h
+TARGET_OMP_TEST=omp_wc_test.out
 
-mpi_wc_test: mpi_wc_test.c
-	mpicc mpi_wc_test.c -o mpi_wc_test
+OBJS_MPI=mpi_wc.c ../htable.h
+TARGET_MPI=mpi_wc.out
 
-omp_wc_test: omp_wc_test.c
-	/opt/homebrew/opt/llvm/bin/clang -fopenmp -L/opt/homebrew/opt/llvm/lib test.c -o test
+OBJS_MPI_TEST=mpi_wc_test.c ../htable.h
+TARGET_MPI_TEST=mpi_wc_test.out
+
+all: $(TARGET) $(TARGET_TEST) $(TARGET_MPI) $(TARGET_MPI_TEST) $(TARGET_OMP) $(TARGET_OMP_TEST)
 
 clean:
-	rm wc
-	rm wc_test
-	rm mpi_wc
-	rm mpi_wc_test
+	rm -f *.o
+	rm -f *.out
+
+$(TARGET) : $(OBJS)
+	$(CC) -o $@ $(OBJS)
+
+$(TARGET_TEST) : $(OBJS_TEST)
+	$(CC) -o $@ $(OBJS_TEST)
+
+$(TARGET_OMP) : $(OBJS_OMP)
+	$(CC) -fopenmp -o $@ $(OBJS_OMP)
+
+$(TARGET_OMP_TEST) : $(OBJS_OMP_TEST)
+	$(CC) -fopenmp -o $@ $(OBJS_OMP_TEST)
+
+$(TARGET_MPI) : $(OBJS_MPI)
+	mpicc -o $@ $(OBJS_MPI)
+
+$(TARGET_MPI_TEST) : $(OBJS_MPI_TEST)
+	mpicc -o $@ $(OBJS_MPI_TEST)
