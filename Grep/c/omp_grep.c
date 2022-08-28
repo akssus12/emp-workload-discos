@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     #pragma omp parallel shared(array_word, array_lines, num) private(i, num_lines, token)
     {
         i = omp_get_thread_num();
-        int * array_lines[i] = calloc(num[i], sizeof(int));
+        array_lines[i] = calloc(num[i], sizeof(int));
         int * backup_ptr = array_lines[i];
 
         start_string = end_string = (char *)array_word[i];
