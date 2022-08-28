@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
             while((token = strtok_r(string, " ", &string))){
                 if(strcmp(token, target) == 0){
                     // printf("lines : %d\n", num_lines);
-                    array_lines[i][num-1] = num_lines;
+                    array_lines[i][num[i]-1] = num_lines;
                     num[i] ++;
                     if((array_lines[i] = (int*)realloc(array_lines[i], sizeof(int)*num[i])) == NULL){
                         free(backup_ptr);
