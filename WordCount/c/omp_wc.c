@@ -56,6 +56,15 @@ void quicksort(COUNT * a, int p, int r)
     }
 }
 
+// Comparison function for qsort() ordering by count descending.
+int cmp_count(const void* p1, const void* p2) {
+    int c1 = ((COUNT*)p1)->count;
+    int c2 = ((COUNT*)p2)->count;
+    if (c1 == c2) return 0;
+    if (c1 < c2) return 1;
+    return -1;
+}
+
 int main(int argc, char** argv) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
@@ -206,11 +215,12 @@ int main(int argc, char** argv) {
     printf("Complete inserting populated data in hashtable to words[]\n");
 
     //////////////////////////////////// QUICK SORT ////////////////////////////////////
-    #pragma omp parallel
-    {
-        #pragma omp single
-        quicksort(words, 0, final_table->count);
-    }
+    // #pragma omp parallel
+    // {
+    //     #pragma omp single
+    //     quicksort(words, 0, final_table->count);
+    // }
+    qsort(&words[0], final_table->count, sizeof(COUNT), cmp_count);
     qsort_time = omp_get_wtime();
     
     printf("Complete sorting words[]\n");

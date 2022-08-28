@@ -26,7 +26,6 @@ int main(int argc, char** argv) {
     struct timeval start,end, file_time, tolower_time, hashing_time, migrate_time,qsort_time;
     char filename[256];
     strcpy(filename, argv[1]);
-    int num_words = 0;
     bool is_alpha = true;
     int i;
     char *start_string, *end_string; // for strchr()
@@ -102,12 +101,12 @@ int main(int argc, char** argv) {
 
     //////////////////////////////////// QUICK SORT ////////////////////////////////////
 
-    qsort(&words[0], num_words, sizeof(COUNT), cmp_count); 
+    qsort(&words[0], hash_table->count, sizeof(COUNT), cmp_count); 
     gettimeofday(&qsort_time, NULL);
 
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
     // Iterate again to print output.
-    // for (int i = 0; i < num_words; i++) {
+    // for (int i = 0; i < hash_table->count; i++) {
     //     printf("%s %d\n", words[i].word, words[i].count);
     // }
     gettimeofday(&end, NULL);
