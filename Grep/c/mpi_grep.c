@@ -42,30 +42,22 @@ int main(int argc, char** argv) {
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
 
-    struct stat sb;
-    struct timeval start, end, execution_1, mpi, file, execution_2;
-    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
+    double start_time, file_time, tolower_time, search_time, communicate_time, end_time;
     char filename[256];
     char target[256];
-    int ch = 0;
-    int num_lines = 0;
-    int num = 1;
-    int received_num;
-    int *received_array_line;
-    int total_line;
-    long line_size;
-    char * word;
-    char * start_string, *end_string; // for strchr()
 
     strcpy(filename, argv[1]);
     strcpy(target, argv[3]);
 
-    gettimeofday(&start, NULL);
+    int total_line = atoi(argv[2]);
+    long line_size = getSpecificSize(filename, (int)total_line/2);
 
+    start_time = MPI_Wtime();
+
+    //////////////////////////////////// READ FILE ////////////////////////////////////
+    char * word;
+    struct stat sb;
     stat(argv[1], &sb);
-
-    total_line = atoi(argv[2]);
-    line_size = getSpecificSize(filename, (int)total_line/2);
 
     FILE *fp;
 
@@ -90,16 +82,26 @@ int main(int argc, char** argv) {
         fread(word, sb.st_size - line_size, 1, fp);
         word[sb.st_size - line_size + 1] = '\0';
     }
+    fclose(fp);
 
-    gettimeofday(&file, NULL);
+    file_time = MPI_Wtime();
+    printf("Complete reading files in the word\n");
 
+    //////////////////////////////////// CONVERT TO LOWERCASE ////////////////////////////////////
     // Convert word to lower case in place.
-    for (char* p = word; *p; p++) {
+    char* p;
+    for (p = word; *p; p++) {
         *p = tolower(*p);
     }
+    tolower_time = MPI_Wtime();
+    printf("Complete converting to lowercase\n");
 
+    //////////////////////////////////// SEARCHING TARGET WORD ////////////////////////////////////
+    int num_lines = 0;
+    int num = 1;
     int * array_line = calloc(num, sizeof(int));
     int * backup_ptr = array_line;
+    char * start_string, *end_string, *token; // for strchr()
 
     start_string = end_string = (char *)word;
 
@@ -109,27 +111,28 @@ int main(int argc, char** argv) {
         strncpy(string, start_string, size_string-1);
         num_lines++;
 
-        char * token = strtok(string, " ");
-        while( token != NULL ){
+        while( token = strtok_r(string, " ", &string) ){
             if(strcmp(token, target) == 0){
                 // printf("lines : %d\n", num_lines);
                 array_line[num-1] = num_lines;
                 num ++;
-                if( NULL == (array_line = (int*)realloc(array_line, sizeof(int)*num)) ){
+                if( (array_line = (int*)realloc(array_line, sizeof(int)*num)) == NULL){
                     free(backup_ptr);
                     fprintf(stderr, "Memory allocation is failed");
                     exit(1);
                 }
                 break;
             } 
-            token = strtok(NULL, " ");
         }
         free(string);
         start_string = end_string + 1;
     }
-    gettimeofday(&execution_1, NULL);
+    search_time = MPI_Wtime();
+    printf("Complete searching target word\n");
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    //////////////////////////////////// MPI ////////////////////////////////////
+    int received_num;
+    int *received_array_line;
 
     if (rank == 0){
         MPI_Recv(&received_num, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -138,19 +141,19 @@ int main(int argc, char** argv) {
         MPI_Send(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    // MPI_Barrier(MPI_COMM_WORLD);
-
     if (rank == 0){
         MPI_Recv(received_array_line, received_num, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     } else {
         MPI_Send(array_line, num, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    gettimeofday(&mpi, NULL);
+    communicate_time = MPI_Wtime();
+    printf("Complete MPI\n");
+
+    //////////////////////////////////// PRINT RESULT ////////////////////////////////////
 
     if (rank == 0){
         // Uncomment it if you want to print the target line
-
         // for (int i=0; i<num-1; i++){
         //     printf("%d\n", array_line[i]);
         // }
@@ -161,28 +164,22 @@ int main(int argc, char** argv) {
         free(received_array_line);
     }
     
-    gettimeofday(&execution_2, NULL);
-    gettimeofday(&end, NULL);
+    end_time = MPI_Wtime();
+
+    //////////////////////////////////// TIME ////////////////////////////////////
 
     if (rank == 0){
-        start_file = (((file.tv_usec - start.tv_usec) / 1.0e6 + file.tv_sec - start.tv_sec) * 1000) / 1000;
-        file_exe1 = (((execution_1.tv_usec - file.tv_usec) / 1.0e6 + execution_1.tv_sec - file.tv_sec) * 1000) / 1000;
-        exe1_mpi = (((mpi.tv_usec - execution_1.tv_usec) / 1.0e6 + mpi.tv_sec - execution_1.tv_sec) * 1000) / 1000;
-        mpi_exe2 = (((execution_2.tv_usec - mpi.tv_usec) / 1.0e6 + execution_2.tv_sec - mpi.tv_sec) * 1000) / 1000;
-        totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
-
-        printf("start_file = %f seconds\n", start_file);
-        printf("file_exe1 = %f seconds\n", file_exe1);
-        printf("exe1_mpi = %f seconds\n", exe1_mpi);
-        printf("mpi_exe2 = %f seconds\n", mpi_exe2);
-        printf("\nTotaltime = %f seconds\n", totaltime);
+        printf("\nTotaltime = %f seconds\n", end_time - start_time);
+        printf("start_file = %f seconds\n", file_time-start_time);
+        printf("file_tolower = %f seconds\n", tolower_time-file_time);
+        printf("tolower_search = %f seconds\n", search_time-tolower_time);
+        printf("search-MPI = %f seconds\n", communicate_time-search_time);
+        printf("MPI-end = %f seconds\n", end_time-communicate_time);
     }
 
-    fclose(fp);
     free(word);
     free(array_line);
     
     MPI_Finalize();
-
     return 0;
 }

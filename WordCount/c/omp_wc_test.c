@@ -12,6 +12,15 @@
 #define MAX_UNIQUES 5000000
 #define TASK_SIZE 100
 
+// Comparison function for qsort() ordering by count descending.
+int cmp_count(const void* p1, const void* p2) {
+    int c1 = ((COUNT*)p1)->count;
+    int c2 = ((COUNT*)p2)->count;
+    if (c1 == c2) return 0;
+    if (c1 < c2) return 1;
+    return -1;
+}
+
 int partition(COUNT * a, int p, int r)
 {
     COUNT lt[r-p];

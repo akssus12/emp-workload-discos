@@ -12,50 +12,6 @@
 #define MAX_UNIQUES 5000000
 #define TASK_SIZE 100
 
-int partition(COUNT * a, int p, int r)
-{
-    COUNT lt[r-p];
-    COUNT gt[r-p];
-    int i;
-    int j;
-    COUNT key = a[r];
-    int lt_n = 0;
-    int gt_n = 0;
-
-    for(i = p; i < r; i++){
-        if(a[i].count > a[r].count){
-            lt[lt_n++] = a[i];
-        }else{
-            gt[gt_n++] = a[i];
-        }   
-    }   
-
-    for(i = 0; i < lt_n; i++){
-        a[p + i] = lt[i];
-    }   
-
-    a[p + lt_n] = key;
-
-    for(j = 0; j < gt_n; j++){
-        a[p + lt_n + j + 1] = gt[j];
-    }   
-
-    return p + lt_n;
-}
-
-void quicksort(COUNT * a, int p, int r)
-{
-    int div;
-
-    if(p < r){ 
-        div = partition(a, p, r); 
-        #pragma omp task shared(a) if(r - p > TASK_SIZE) 
-        quicksort(a, p, div - 1); 
-        #pragma omp task shared(a) if(r - p > TASK_SIZE)
-        quicksort(a, div + 1, r); 
-    }
-}
-
 // Comparison function for qsort() ordering by count descending.
 int cmp_count(const void* p1, const void* p2) {
     int c1 = ((COUNT*)p1)->count;
@@ -82,8 +38,7 @@ int main(int argc, char** argv) {
     //////////////////////////////////// READ FILE ////////////////////////////////////
     stat(argv[1], &sb);
 
-    char **array_word;
-    array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
+    char ** array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
     FILE *fp;
     #pragma omp parallel shared(array_word) private(i, fp) num_threads(2)
     {

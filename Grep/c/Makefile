@@ -1,21 +1,44 @@
-all: grep grep_test mpi_grep mpi_grep_test
+CC=gcc
+CFLAGS=-g -Wall
 
-CC = gcc
+OBJS=grep.c
+TARGET=grep.out
 
-grep: grep.c
-	gcc grep.c -o grep
+OBJS_TEST=grep_test.c
+TARGET_TEST=grep_test.out
 
-grep_test: grep_test.c
-	gcc grep_test.c -o grep_test
+OBJS_OMP=omp_grep.c
+TARGET_OMP=omp_grep.out
 
-mpi_grep: mpi_grep.c
-	mpicc mpi_grep.c -o mpi_grep
+OBJS_OMP_TEST=omp_grep_test.c
+TARGET_OMP_TEST=omp_grep_test.out
 
-mpi_grep_test: mpi_grep_test.c
-	mpicc mpi_grep_test.c -o mpi_grep_test
+OBJS_MPI=mpi_grep.c
+TARGET_MPI=mpi_grep.out
+
+OBJS_MPI_TEST=mpi_grep_test.c
+TARGET_MPI_TEST=mpi_grep_test.out
+
+all: $(TARGET) $(TARGET_TEST) $(TARGET_MPI) $(TARGET_MPI_TEST) $(TARGET_OMP) $(TARGET_OMP_TEST)
 
 clean:
-	rm grep
-	rm grep_test
-	rm mpi_grep
-	rm mpi_grep_test
+	rm -f *.o
+	rm -f *.out
+
+$(TARGET) : $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
+
+$(TARGET_TEST) : $(OBJS_TEST)
+	$(CC) $(CFLAGS) -o $@ $(OBJS_TEST)
+
+$(TARGET_OMP) : $(OBJS_OMP)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP)
+
+$(TARGET_OMP_TEST) : $(OBJS_OMP_TEST)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP_TEST)
+
+$(TARGET_MPI) : $(OBJS_MPI)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI)
+
+$(TARGET_MPI_TEST) : $(OBJS_MPI_TEST)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI_TEST)

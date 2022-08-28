@@ -9,18 +9,17 @@
 
 int main(int argc, char** argv) {
     struct stat sb;
-    struct timeval start, end;
-    double totaltime;
+    struct timeval start, end, file_t, tolower_t;
+    
     char filename[256];
     char target[256];
-    int ch = 0;
     int num_lines = 0;
-    char * start_string, *end_string; // for strchr()
-
+    
     strcpy(filename, argv[1]);
     strcpy(target, argv[2]);
 
     gettimeofday(&start, NULL);
+    //////////////////////////////////// READ FILE ////////////////////////////////////
 
     FILE *fp;
 
@@ -37,32 +36,36 @@ int main(int argc, char** argv) {
     //fscanf(fp,"%100s", word);
     fread(word, sb.st_size+1, 1, fp);
     word[sb.st_size+1] = '\0';
-    printf("sb.st_size : %lu\n", sb.st_size);
-    printf("word size : %lu\n", malloc_usable_size(word));
+    
+    fclose(fp);
+
+    gettimeofday(&file_t, NULL);
+    printf("Complete reading files in the array_word[i]\n");
+
+    //////////////////////////////////// CONVERT TO LOWERCASE ////////////////////////////////////
 
     // Convert word to lower case in place.
     char* p;
     for (p = word; *p; p++) {
         *p = tolower(*p);
     }
+    gettimeofday(&tolower_t, NULL);
+    printf("Complete converting to lowercase\n");
 
+    //////////////////////////////////// SEARCHING TARGET WORD ////////////////////////////////////
+    char * start_string, *end_string; // for strchr()
     start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
         char *string = calloc(size_string, sizeof(char));
         strncpy(string, start_string, size_string-1);
-        // string[size_string] = '\0';
-        // int size_string = end_string - start_string;
-        // string = (char *)malloc(sizeof(char) * size_string + 1);
-        // memset(string, 0, sizeof(char) * size_string + 1);
-        // strncpy(string, start_string, size_string);
-        // string[size_string+1] = '\0';
         num_lines++;
 
         char * token = strtok(string, " ");
         while( token != NULL ){
             if(strcmp(token, target) == 0){
+                // Uncomment it if you want to print the target line
                 // printf("lines : %d\n", num_lines);
                 break;
             } 
@@ -72,11 +75,21 @@ int main(int argc, char** argv) {
         start_string = end_string + 1;
     }
     gettimeofday(&end, NULL);
+    printf("Complete searching target word\n");
+
+    //////////////////////////////////// TIME ////////////////////////////////////
+    double totaltime, file_time, tolower_time, search_time;
     totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
+    file_time = (((file_t.tv_usec - start.tv_usec) / 1.0e6 + file_t.tv_sec - start.tv_sec) * 1000) / 1000;
+    tolower_time = (((tolower_t.tv_usec - file_t.tv_usec) / 1.0e6 + tolower_t.tv_sec - file_t.tv_sec) * 1000) / 1000;
+    search_time = (((end.tv_usec - tolower_t.tv_usec) / 1.0e6 + end.tv_sec - tolower_t.tv_sec) * 1000) / 1000;
 
     printf("\nTotaltime = %f seconds\n", totaltime);
+    printf("\nstart-file = %f seconds\n", file_time);
+    printf("\nfile-tolower = %f seconds\n", tolower_time);
+    printf("\ntolower-search&end  = %f seconds\n", search_time);
 
-    fclose(fp);
+    //////////////////////////////////// FREE ////////////////////////////////////
     free(word);
 
     return 0;
