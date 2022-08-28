@@ -7,19 +7,44 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include "../htable.h"
 
-#define MAX_UNIQUES 8000000
+#define MAX_UNIQUES 5000000
 #define Max_length 50
 
 typedef struct {
     int count;
     char word[Max_length];
-} count;
+} MAX_COUNT;
+
+void migrate_MPI(MAX_COUNT* words, HashTable* final_table, int h_start, int h_end, int c_start, int c_end){
+    Node *current = NULL;
+
+    int i;
+    int j = c_start;
+
+    for (i = h_start; i < h_end; i++){
+        current = final_table->nodes[i];
+        if (current == NULL)
+            continue;
+
+        if (j >= c_end){
+            return;
+        }
+        
+        while(current != NULL){
+            strncpy(words[j].word, current->key, Max_length);
+            words[j].count = current->value;
+            current = current->next;
+            j++;
+        }
+    }
+}
 
 // Comparison function for qsort() ordering by count descending.
 int cmp_count(const void* p1, const void* p2) {
-    int c1 = ((count*)p1)->count;
-    int c2 = ((count*)p2)->count;
+    int c1 = ((MAX_COUNT*)p1)->count;
+    int c2 = ((MAX_COUNT*)p2)->count;
     if (c1 == c2) return 0;
     if (c1 < c2) return 1;
     return -1;
@@ -28,19 +53,28 @@ int cmp_count(const void* p1, const void* p2) {
 int main(int argc, char** argv) {
     // Used to find the file size
     struct stat sb;
-    struct timeval start,end, execution_1, mpi, file, execution_2;
-    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
+    double start_time, file_time, tolower_time, hashing_time;
+    double migrate_comm_time, communicate_time, after_comm_time;
     MPI_Init( &argc, &argv );
     int rank, size;
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
+
+    char filename[256];
+    strcpy(filename, argv[1]);
+    
+    bool is_alpha = true;
+    int i, j;
+
+    start_time = MPI_Wtime();
+    //////////////////////////////////// CREATE THE DATATYPE FOR MPI ////////////////////////////////////
 
     // Create the Datatype for MPI
     MPI_Datatype countMPI;
     int lenghts[2] = {1, Max_length};
 
     MPI_Aint displacements[2];
-    count dummy_count;
+    MAX_COUNT dummy_count;
     MPI_Aint base_address;
     MPI_Get_address(&dummy_count, &base_address);
     MPI_Get_address(&dummy_count.count, &displacements[0]);
@@ -51,36 +85,9 @@ int main(int argc, char** argv) {
     MPI_Datatype types[2] = { MPI_INT, MPI_CHAR };
     MPI_Type_create_struct(2, lenghts, displacements, types, &countMPI);
     MPI_Type_commit(&countMPI);
-    
-    
-    int lines;
 
-    gettimeofday(&start, NULL);
-
-    char filename[256];
-    strcpy(filename, argv[1]);
-    // The hcreate hash table doesn't provide a way to iterate, so
-    // store the words in an array too (also used for sorting).
-    count* words = calloc(MAX_UNIQUES, sizeof(count));
-    count* receive_words;
-    count* final_words;
-    int num_words = 0;
-    int total_words = 0;
-    int received_num_words[2];
-
-    bool is_alpha = true;
-    int i;
-
-    char *start_string, *end_string; // for strchr()
-
-    // Allocate hash table.
-    if (hcreate(MAX_UNIQUES) == 0) {
-        fprintf(stderr, "error creating hash table\n");
-        return 1;
-    }
-
+    //////////////////////////////////// READ FILE ////////////////////////////////////
     stat(argv[1], &sb);
-
     FILE *fp;
 
     fp = fopen(filename, "r");
@@ -88,111 +95,81 @@ int main(int argc, char** argv) {
         printf("Error opening data file\n");
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
     char* word = malloc(sb.st_size/2 + 1);
     memset(word, 0, sb.st_size/2+1);
 
     fseek(fp, 0, SEEK_SET);
-
     if (rank != 0){
         fseek(fp, sb.st_size/2, SEEK_SET);
     }
 
     fread(word, sb.st_size/2, 1, fp);
+    file_time = MPI_Wtime();
+    printf("%d rank : Complete reading files\n", rank);
 
-    gettimeofday(&file, NULL);
-
+    //////////////////////////////////// CONVERT TO LOWERCASE ////////////////////////////////////
+    char* p;
     // Convert word to lower case in place.
-    for (char* p = word; *p; p++) {
+    for (p = word; *p; p++) {
         *p = tolower(*p);
     }
+    tolower_time = MPI_Wtime();
+    printf("%d rank : Complete converting to lowercase\n", rank);
 
+    //////////////////////////////////// HASHING WORD TO HASH TABLE ////////////////////////////////////
+    HashTable* hash_table = create_htable(MAX_UNIQUES);
+    char *start_string, *end_string, *free_string, *token; // for strchr()
     start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
         char *string = calloc(size_string, sizeof(char));
         strncpy(string, start_string, size_string-1);
+        free_string = string;
 
-        char * token = strtok(string, " ");
-        while( token != NULL ){
-            for ( i=0; token[i] != '\0'; i++ ){
-                if ( isalpha(token[i]) == 0 ) {
+        while(( token = strtok_r(string, " ", &string) )){
+            for ( j=0; token[j] != '\0'; j++ ){
+                if ( isalpha(token[j]) == 0 ) {
                     is_alpha = false;
                     break;
                 }
             }
             
-            if ( !is_alpha || strlen(token) >= 50 ){
-                token = strtok(NULL, " ");
+            if ( !is_alpha || strlen(token) >= 50 || token[0] =='\n'){
                 is_alpha = true;
                 continue;
             }
 
-            // Search for word in hash table.
-            ENTRY item = {token, NULL};
-            ENTRY* found = hsearch(item, FIND);
-            if (found != NULL) {
-                // Word already in table, increment count.
-                int* pn = (int*)found->data;
-                (*pn)++;
-                token = strtok(NULL, " ");
-            } else {
-                // Word not in table, insert it with count 1.
-                item.key = strdup(token); // need to copy word
-                if (item.key == NULL) {
-                    fprintf(stderr, "out of memory in strdup\n");
-                    return 1;
-                }
-                int* pn = malloc(sizeof(int));
-                if (pn == NULL) {
-                    fprintf(stderr, "out of memory in malloc\n");
-                    return 1;
-                }
-                *pn = 1;
-                item.data = pn;
-                ENTRY* entered = hsearch(item, ENTER);
-                if (entered == NULL) {
-                    fprintf(stderr, "table full, increase MAX_UNIQUES\n");
-                    return 1;
-                }
-
-                // And add to words list for iterating.
-                // words[num_words].word = item.key; // error : assignment to expression with array type
-                strcpy(words[num_words].word, item.key);
-                
-                num_words++;
-                token = strtok(NULL, " ");
-            }
+            ht_insert(hash_table, token, 1);
         }
-        free(string);
+        free(free_string);
         start_string = end_string + 1;
     }
+    printf("%d : frequency of words %d\n", rank, hash_table->count);
 
-    // Iterate once to add counts to words list (not sort)
-    for (i = 0; i < num_words; i++) {
-        ENTRY item = {words[i].word, NULL};
-        ENTRY* found = hsearch(item, FIND);
-        if (found == NULL) { // shouldn't happen
-            fprintf(stderr, "key not found12: %s\n", item.key);
-            return 1;
-        }
-        words[i].count = *(int*)found->data;
-    }
+    hashing_time = MPI_Wtime();
+    printf("%d rank : Complete hashing to words\n", rank);
 
-    gettimeofday(&execution_1, NULL);
+    //////////////////////////////////// MIGRATE WORD TO ARRAY FOR COMMUNICATION ////////////////////////////////////
+    MAX_COUNT* words = calloc(hash_table->count, sizeof(MAX_COUNT));
+    migrate_MPI(words, hash_table, 0, hash_table->size, 0, hash_table->count);
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    migrate_comm_time = MPI_Wtime();
+    printf("%d rank : Complete migrate words to array for MPI\n", rank);
 
+    //////////////////////////////////// TRANSFER ARRAY ////////////////////////////////////
+    int num_words = hash_table->count;
+    int received_num_words[2];
+    int total_words;
+    MAX_COUNT* receive_words;
     MPI_Gather(&num_words, 1, MPI_INT, received_num_words, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-
-    MPI_Barrier(MPI_COMM_WORLD);
     
     if(rank == 0){
+        printf("received_num_words[0] : %d\n", received_num_words[0]);
+        printf("received_num_words[1] : %d\n", received_num_words[1]);
         total_words = received_num_words[0] + received_num_words[1];
-        receive_words = calloc(total_words, sizeof(count));
+        printf("total_words : %d\n", total_words);
+        receive_words = calloc(total_words, sizeof(MAX_COUNT));
         int counts[2] = {received_num_words[0], received_num_words[1]};
         int displs[2] = {0, received_num_words[0]};
         MPI_Gatherv(words, num_words, countMPI, receive_words, counts, displs, countMPI, 0, MPI_COMM_WORLD);
@@ -201,83 +178,45 @@ int main(int argc, char** argv) {
         MPI_Gatherv(words, num_words, countMPI, NULL, NULL, NULL, countMPI, 0, MPI_COMM_WORLD);
     }
 
+    communicate_time = MPI_Wtime();
+    printf("%d rank : Complete MPI\n", rank);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    gettimeofday(&mpi, NULL);
-    
-    if(rank==0){
-        for (i=num_words; i<total_words; i++){
-            // Search for word in hash table.
-            ENTRY item = {receive_words[i].word, NULL};
-            ENTRY* found = hsearch(item, FIND);
-            if (found != NULL) {
-                // Word already in table, increment count.
-                int* pn = (int*)found->data;
-                (*pn) += receive_words[i].count;
-
-            } else {
-                // Word not in table, insert it with count 1.
-                item.key = strdup(receive_words[i].word); // need to copy word
-                if (item.key == NULL) {
-                    fprintf(stderr, "out of memory in strdup\n");
-                    return 1;
-                }
-                int* pn = malloc(sizeof(int));
-                if (pn == NULL) {
-                    fprintf(stderr, "out of memory in malloc\n");
-                    return 1;
-                }
-                *pn = receive_words[i].count;
-                item.data = pn;
-                ENTRY* entered = hsearch(item, ENTER);
-                if (entered == NULL) {
-                    fprintf(stderr, "table full, increase MAX_UNIQUES\n");
-                    return 1;
-                }
-
-                // And add to words list for iterating.
-                strncpy(words[num_words].word, item.key, Max_length-1);
-                words[num_words].word[Max_length] = '\0';
-                num_words++;
-            }
-        }    
-
-        for (i = 0; i < num_words; i++) {
-                 ENTRY item = {words[i].word, NULL};
-                 ENTRY* found = hsearch(item, FIND);
-                 if (found == NULL) { // shouldn't happen
-                     fprintf(stderr, "key not found: %s\n", item.key);
-                     return 1;
-                 }
-                 words[i].count = *(int*)found->data;
+    //////////////////////////////////// AFTER MPI ////////////////////////////////////
+    if ( rank == 0 ) {
+        for (i=num_words; i<total_words; i++) {
+            ht_insert(hash_table, receive_words[i].word, receive_words[i].count);
         }
-        qsort(&words[0], num_words, sizeof(count), cmp_count);
-
-        gettimeofday(&execution_2, NULL);
-        gettimeofday(&end, NULL);
-        start_file = (((file.tv_usec - start.tv_usec) / 1.0e6 + file.tv_sec - start.tv_sec) * 1000) / 1000;
-        file_exe1 = (((execution_1.tv_usec - file.tv_usec) / 1.0e6 + execution_1.tv_sec - file.tv_sec) * 1000) / 1000;
-        exe1_mpi = (((mpi.tv_usec - execution_1.tv_usec) / 1.0e6 + mpi.tv_sec - execution_1.tv_sec) * 1000) / 1000;
-        mpi_exe2 = (((execution_2.tv_usec - mpi.tv_usec) / 1.0e6 + execution_2.tv_sec - mpi.tv_sec) * 1000) / 1000;
-        totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
-
-        printf("num_words : %d\n", num_words);
-        printf("start_file = %f seconds\n", start_file);
-        printf("file_exe1 = %f seconds\n", file_exe1);
-        printf("exe1_mpi = %f seconds\n", exe1_mpi);
-        printf("mpi_exe2 = %f seconds\n", mpi_exe2);
-        printf("\nTotaltime = %f seconds\n", totaltime);
         
+        COUNT* final_words = calloc(hash_table->count, sizeof(COUNT));
+        printf("num : %d\n", hash_table->count);
+        migrate(final_words, hash_table, 0, hash_table->size, 0, hash_table->count);
+
+        qsort(&words[0], final_words->count, sizeof(Max_length), cmp_count);
+        after_comm_time = MPI_Wtime();
+        printf("%d rank : Complete tasks after MPI\n", rank);
+
+        //////////////////////////////////// TIME ////////////////////////////////////
+
+        printf(" number of words : %d\n", hash_table->count);
+        printf("\n Totaltime = %.6f seconds\n", after_comm_time-start_time);
+        printf("\n start-file = %.6f seconds\n", file_time-start_time);
+        printf("\n file-tolower = %.6f seconds\n", tolower_time-file_time);
+        printf("\n tolower-hashing = %.6f seconds\n", hashing_time-tolower_time);
+        printf("\n hashing-migrate_comm = %.6f seconds\n", migrate_comm_time-hashing_time);
+        printf("\n migrate_comm-communication = %.6f seconds\n", communicate_time-migrate_comm_time);
+        printf("\n communication-after_comm = %.6f seconds\n", after_comm_time-communicate_time);
+
+        //////////////////////////////////// FREE ////////////////////////////////////
+
+        free(final_words);
         free(receive_words);
-        
-    }   
+    }
+    
+    // [TODO] : need to implemet hashtable free. (occuring invalid pointer)
     fclose(fp);
     free(words);
     free(word);
 
     MPI_Finalize();
-
     return 0;
 }
-
