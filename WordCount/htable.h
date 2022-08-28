@@ -108,7 +108,7 @@ void free_htable(HashTable* table) {
         while (table->nodes[i] != NULL){
             tmp = table->nodes[i];
             table->nodes[i] = table->nodes[i]->next;
-            free_node(tmp, id);
+            free_node(tmp);
         }
     }
 
