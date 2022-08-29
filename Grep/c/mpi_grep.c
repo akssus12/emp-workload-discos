@@ -11,7 +11,8 @@
 long getSpecificSize(char *name, int target_line){
     FILE *ptr;
     long size=0;
-    int line=
+    int line=0;
+    char c;
 
     ptr=fopen(name,"r");
     if (ptr == NULL) {
