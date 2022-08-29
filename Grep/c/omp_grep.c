@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
         i = omp_get_thread_num();
         array_lines[i] = calloc(num[i], sizeof(int));
         int * backup_ptr = array_lines[i];
+        num_lines = 0;
 
         start_string = end_string = (char *)array_word[i];
 
