@@ -53,13 +53,14 @@ int main(int argc, char** argv) {
     printf("Complete converting to lowercase\n");
 
     //////////////////////////////////// SEARCHING TARGET WORD ////////////////////////////////////
-    char * start_string, *end_string, *token; // for strchr()
+    char * start_string, *end_string, *token, *free_string; // for strchr()
     start_string = end_string = (char *)word;
 
     while( (end_string = strchr(start_string, '\n')) ){
         int size_string = end_string - start_string + 1;
         char *string = calloc(size_string, sizeof(char));
         strncpy(string, start_string, size_string-1);
+        free_string = string;
         num_lines++;
 
         while( (token = strtok_r(string, " ", &string)) ){
@@ -69,7 +70,7 @@ int main(int argc, char** argv) {
                 break;
             } 
         }
-        free(string);
+        free(free_string);
         start_string = end_string + 1;
     }
     gettimeofday(&end, NULL);
