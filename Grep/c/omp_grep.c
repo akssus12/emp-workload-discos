@@ -101,12 +101,12 @@ int main(int argc, char** argv) {
     printf("Complete converting to lowercase\n");
 
     //////////////////////////////////// SEARCHING TARGET WORD ////////////////////////////////////
-    char * start_string, *end_string, *token; // for strchr()
+    char * start_string, *end_string, *token, *free_string, *string; // for strchr()
     int num[2] = {1, 1};
     int num_lines = 0;
     int ** array_lines = (int **) calloc(NUM_THREADS, sizeof(int*));
 
-    #pragma omp parallel shared(array_word, array_lines, num) private(i, num_lines, token)
+    #pragma omp parallel shared(array_word, array_lines, num) private(i, num_lines, token, start_string, end_string, string, free_string)
     {
         i = omp_get_thread_num();
         array_lines[i] = calloc(num[i], sizeof(int));
@@ -117,8 +117,9 @@ int main(int argc, char** argv) {
 
         while( (end_string = strchr(start_string, '\n')) ){
             int size_string = end_string - start_string + 1;
-            char *string = calloc(size_string, sizeof(char));
+            string = calloc(size_string, sizeof(char));
             strncpy(string, start_string, size_string-1);
+            free_string = string;
             num_lines++;
 
             while((token = strtok_r(string, " ", &string))){
@@ -134,7 +135,7 @@ int main(int argc, char** argv) {
                     break;
                 } 
             }
-            free(string);
+            free(free_string);
             start_string = end_string + 1;
         }
     }
