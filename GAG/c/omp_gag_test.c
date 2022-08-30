@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
     char filename[256];
     int total_line;
     int max = 0;
-    int i;
+    int i, j;
 
     strcpy(filename, argv[1]);
     total_line = atoi(argv[2]);
