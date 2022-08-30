@@ -8,9 +8,9 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-long getSpecificSize(char *name, int target_line){
+long* getSpecificSize(char *name, int target_line){
     FILE *ptr;
-    long size=0;
+    long* size = calloc(2, sizeof(long));
     int line=0;
     char c;
 
@@ -20,14 +20,16 @@ long getSpecificSize(char *name, int target_line){
     }
     
     while((c=fgetc(ptr))!=EOF){
-        if( line != target_line ) {
-            size ++;
-            if( c == '\n') {
-                line ++;
-            }
-        } else {
-            break;
+        size[1] ++;
+        if(c=='\n'){
+            line ++;
         }
+        if (line >= 1){
+            if( line != target_line ) {
+                size[0] ++;
+            } else
+                break;
+        } 
     }
 
     fseek(ptr, 0, SEEK_SET);
@@ -146,14 +148,10 @@ int main(int argc, char** argv) {
 
     start_time = omp_get_wtime();
     //////////////////////////////////// READ FILE ////////////////////////////////////
-    long line_size = getSpecificSize(filename, (int)total_line/2);
+    long* line_size = getSpecificSize(filename, (int)total_line/2);
     stat(argv[1], &sb);
 
     FILE * fp;
-    fp = fopen(filename, "r");
-    if (fp == NULL){
-        printf("Error opening data file\n");
-    }
     char ** array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
     char* free_word[2];
 
@@ -162,32 +160,33 @@ int main(int argc, char** argv) {
         i = omp_get_thread_num();
 
         fp = fopen(filename, "r");
-        if (fp == NULL) {
+        if (fp == NULL){
             printf("Error opening data file\n");
         }
-
+    
         if (i%2 == 0){
-            array_word[i] = malloc(line_size + 1);
-            memset(array_word[i], 0, line_size + 1);
+            array_word[i] = malloc(line_size[i] + 1);
+            memset(array_word[i], 0, line_size[i] + 1);
 
             fscanf(fp, "%d\n", &max);
 
-            fread(array_word[i], line_size, 1, fp);
-            array_word[i][line_size + 1] = '\0';
+            fread(array_word[i], line_size[i], 1, fp);
+            array_word[i][line_size[i] + 1] = '\0';
         } else {
-            array_word[i] = malloc(sb.st_size - line_size + 1);
-            memset(array_word[i], 0, sb.st_size - line_size + 1);
+            array_word[i] = malloc(sb.st_size - line_size[i] + 1);
+            memset(array_word[i], 0, sb.st_size - line_size[i] + 1);
 
-            fseek(fp, line_size, SEEK_SET);
+            fseek(fp, line_size[i], SEEK_CUR);
 
-            fread(array_word[i], sb.st_size - line_size, 1, fp);
-            array_word[i][sb.st_size - line_size + 1] = '\0';
+            fread(array_word[i], sb.st_size - line_size[i], 1, fp);
+            array_word[i][sb.st_size - line_size[i] + 1] = '\0';
         }
         free_word[i] = array_word[i];
+        fclose(fp);
 
         printf("ID : %d, %s\n", i, array_word[i]);
-        fclose(fp);
     }
+    free(line_size);
     file_time = omp_get_wtime();
     printf("Complete reading files in the array_word[i]\n");
 
@@ -234,15 +233,12 @@ int main(int argc, char** argv) {
 
     //////////////////////////////////// REDUCE ////////////////////////////////////
 
-    #pragma omp parallel for reduction(+:reduce_sum_array[:max])
+    #pragma omp parallel for reduction(+:reduce_sum_array[:max], reduce_num_array[:max]) private(j)
     for(i=0; i<max; i++){
-        int id = omp_get_thread_num();
-        reduce_sum_array[i] += sum_array[id][i];
-    }
-    #pragma omp parallel for reduction(+:reduce_num_array[:max])
-    for(i=0; i<max; i++){
-        int id = omp_get_thread_num();
-        reduce_num_array[i] += num_array[id][i];
+        for(j=0; j<NUM_THREADS; j++){
+            reduce_sum_array[i] += sum_array[j][i];
+            reduce_num_array[i] += num_array[j][i];
+        }
     }
     printf("finish reduction\n");
     reduce_time = omp_get_wtime();
@@ -259,7 +255,6 @@ int main(int argc, char** argv) {
             sum = reduce_sum_array[i];
 
             // Uncomment it if you want to print the result
-
             printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);   
         }
     }
@@ -292,7 +287,6 @@ int main(int argc, char** argv) {
     free(num_array);
     free(reduce_num_array);
     free(reduce_sum_array);
-
 
     return 0;
 }

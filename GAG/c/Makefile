@@ -1,21 +1,44 @@
-all: gag gag_test mpi_gag mpi_gag_test
+CC=gcc
+CFLAGS=-g -Wall
 
-CC =  gcc
+OBJS=gag.c
+TARGET=gag.out
 
-gag: gag.c
-	gcc gag.c -o gag
+OBJS_TEST=gag_test.c
+TARGET_TEST=gag_test.out
 
-gag_test: gag_test.c
-	gcc gag_test.c -o gag_test
+OBJS_OMP=omp_gag.c
+TARGET_OMP=omp_gag.out
 
-mpi_gag: mpi_gag.c
-	mpicc mpi_gag.c -o mpi_gag
+OBJS_OMP_TEST=omp_gag_test.c
+TARGET_OMP_TEST=omp_gag_test.out
 
-mpi_gag_test: mpi_gag_test.c
-	mpicc mpi_gag_test.c -o mpi_gag_test
+OBJS_MPI=mpi_gag.c
+TARGET_MPI=mpi_gag.out
+
+OBJS_MPI_TEST=mpi_gag_test.c
+TARGET_MPI_TEST=mpi_gag_test.out
+
+all: $(TARGET) $(TARGET_TEST) $(TARGET_MPI) $(TARGET_MPI_TEST) $(TARGET_OMP) $(TARGET_OMP_TEST)
 
 clean:
-	rm gag
-	rm gag_test
-	rm mpi_gag
-	rm mpi_gag_test
+	rm -f *.o
+	rm -f *.out
+
+$(TARGET) : $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
+
+$(TARGET_TEST) : $(OBJS_TEST)
+	$(CC) $(CFLAGS) -o $@ $(OBJS_TEST)
+
+$(TARGET_OMP) : $(OBJS_OMP)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP)
+
+$(TARGET_OMP_TEST) : $(OBJS_OMP_TEST)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP_TEST)
+
+$(TARGET_MPI) : $(OBJS_MPI)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI)
+
+$(TARGET_MPI_TEST) : $(OBJS_MPI_TEST)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI_TEST)
