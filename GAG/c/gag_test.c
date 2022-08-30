@@ -71,7 +71,7 @@ void create(int key, int data){
     // printf("addr of new_node's pointer : %p\n", new_node);
     // If it is first node
     if (list_node[key].num == 0){
-        // Init the start
+        //Init the start
         // printf("first node! \n");
         list_node[key].next = new_node;
         list_node[key].num++;
@@ -102,7 +102,8 @@ void aggregate(int max_key){
             }
             list_node[i].sum = sum;
             list_node[i].avg = sum/num;
-            printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
+            // Uncomment it if you want to print the result
+            // printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
         }
         
     }
