@@ -34,7 +34,7 @@ void init(int max_key){
 }
 
 void destroy(int max_key){
-    int i, j;
+    int i;
     struct Node* remove;
     for (i=0; i<max_key; i++){
         if (list_node[i].num == 0) {
@@ -43,18 +43,8 @@ void destroy(int max_key){
             while(list_node[i].next != NULL){
                 remove = list_node[i].next;
                 list_node[i].next = remove->next;
-                // remove->next=NULL;
-                // printf("free node | key: %d, value: %d\n", i, remove->value);
                 free(remove);
-                // remove = NULL;
             }
-            // for (j=0; j<list_node[i].num && list_node[i].next != NULL; j++){
-            //     remove = list_node[i].next;
-            //     list_node[i].next = remove->next;
-            //     printf("free node | key: %d, value: %d\n", i, remove->value);
-            //     free(remove);
-            //     remove = NULL;
-            // }
         }
     }
 }
@@ -66,18 +56,13 @@ void create(int key, int data){
     new_node = calloc(1, sizeof(struct Node));
     new_node->value = data;
     new_node->next = NULL;
-    // printf("size of created new_node : %lu\n", malloc_usable_size(new_node));
-    // printf("size of created new_node/sizeof(Node) : %lu\n", malloc_usable_size(new_node)/sizeof(struct Node));
-    // printf("addr of new_node's pointer : %p\n", new_node);
     // If it is first node
     if (list_node[key].num == 0){
         //Init the start
-        // printf("first node! \n");
         list_node[key].next = new_node;
         list_node[key].num++;
     } else {
         // Insert the node in the end
-        // printf("insert node! \n");
         node = list_node[key].next;
         list_node[key].next = new_node;
         new_node->next = node;
@@ -102,8 +87,6 @@ void aggregate(int max_key){
             }
             list_node[i].sum = sum;
             list_node[i].avg = sum/num;
-            // Uncomment it if you want to print the result
-            // printf("key: %d | num: %d | sum: %d | avg: %lf\n", i, num, sum, list_node[i].avg);
         }
         
     }
@@ -111,14 +94,15 @@ void aggregate(int max_key){
 
 int main(int agrc, char** argv){
     struct stat sb;
-    struct timeval start, end;
+    struct timeval start, end, file_t, create_t, agg_t;
     char filename[256];
     int key, value;
-    double totaltime;
+    int i;
 
     strcpy(filename, argv[1]);
 
     gettimeofday(&start, NULL);
+    //////////////////////////////////// READ FILE ////////////////////////////////////
 
     FILE * fp;
     fp = fopen(filename, "r");
@@ -138,37 +122,64 @@ int main(int agrc, char** argv){
 
     fread(word, sb.st_size+1, 1, fp);
     word[sb.st_size+1] = '\0';
-    printf("sb.st_size : %lu\n", sb.st_size);
-    printf("word size : %lu\n", malloc_usable_size(word));
 
+    printf("Complete reading files\n");
+    gettimeofday(&file_t, NULL);
+    //////////////////////////////////// INSERT DATA INTO NODE ////////////////////////////////////
     init(max);
-    // printf("size of list_node[] : %lu\n", malloc_usable_size(list_node)/sizeof(struct Front));
-    // printf("size of list_node : %lu\n", malloc_usable_size(list_node));
-    // printf("addr of list_node's pointer : %p\n", list_node);
-
     char * token = strtok(word, "\n");
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
-        // printf("%s\n", token);
-        // printf("insert node key: %d, value: %d\n", key, value);
         create(key, value);
 
         token = strtok(NULL, "\n");
     }
+
     printf("finish insert node\n");
+    gettimeofday(&create_t, NULL);
+    //////////////////////////////////// AGGREGATE ////////////////////////////////////
     aggregate(max);
     printf("finish aggregation\n");
+    gettimeofday(&agg_t, NULL);
+
+    //////////////////////////////////// PRINT RESULT ////////////////////////////////////
+    float sum;
+    int num;
+    for(i=0; i<max; i++){
+        if (list_node[i].num == 0){
+            continue;
+        } else {
+            sum = list_node[i].sum;
+            num = list_node[i].num;
+
+            // Uncomment it if you want to print the result
+            printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);  
+        }
+    }
+
+    printf("finish print result\n");
+    gettimeofday(&end, NULL);
+
+    //////////////////////////////////// TIME ////////////////////////////////////
+    double totaltime, file_time, create_time, agg_time, end_time;
+    totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
+    file_time = (((file_t.tv_usec - start.tv_usec) / 1.0e6 + file_t.tv_sec - start.tv_sec) * 1000) / 1000;
+    create_time = (((create_t.tv_usec - file_t.tv_usec) / 1.0e6 + create_t.tv_sec - file_t.tv_sec) * 1000) / 1000;
+    agg_time = (((agg_t.tv_usec - create_t.tv_usec) / 1.0e6 + agg_t.tv_sec - create_t.tv_sec) * 1000) / 1000;
+    end_time = (((end.tv_usec - agg_t.tv_usec) / 1.0e6 + end.tv_sec - agg_t.tv_sec) * 1000) / 1000;
+
+    printf("\nTotaltime = %f seconds\n", totaltime);
+    printf("\n start-file = %f seconds\n", file_time);
+    printf("\n file-create = %f seconds\n", create_time);
+    printf("\n create-aggregate = %f seconds\n", agg_time);
+    printf("\n aggregate-end = %f seconds\n", end_time);
+
     destroy(max);
     printf("finish destroy\n");
 
     free(word);
     free(list_node);
-
-    gettimeofday(&end, NULL);
-    totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
-
-    printf("\nTotaltime = %f seconds\n", totaltime);
 
     return 0;
 }
