@@ -224,7 +224,6 @@ int main(int argc, char** argv) {
     printf("finish aggregation\n");
     agg_time = omp_get_wtime();
 
-    int j;
     for (i= 0; i<NUM_THREADS; i++){
         for (j=0; j<max; j++){
             printf("ID : %d, key : %d, num : %d, sum : %d\n", i, j, num_array[i][j], sum_array[i][j]);
