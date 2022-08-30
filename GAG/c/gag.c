@@ -34,7 +34,7 @@ void init(int max_key){
 }
 
 void destroy(int max_key){
-    int i, j;
+    int i;
     struct Node* remove;
     for (i=0; i<max_key; i++){
         if (list_node[i].num == 0) {
@@ -97,7 +97,7 @@ int main(int agrc, char** argv){
     struct timeval start, end, file_t, create_t, agg_t;
     char filename[256];
     int key, value;
-    int i, j;
+    int i;
 
     strcpy(filename, argv[1]);
 
@@ -144,7 +144,6 @@ int main(int agrc, char** argv){
     gettimeofday(&agg_t, NULL);
 
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
-    int i, j;
     float sum;
     int num;
     for(i=0; i<max; i++){
