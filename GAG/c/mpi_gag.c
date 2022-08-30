@@ -171,8 +171,6 @@ int main(int argc, char** argv) {
         fread(word, line_size[rank] + 1, 1, fp);
         word[line_size[rank] + 1] = '\0';
 
-        printf("%d : %s\n", rank, word);
-
         MPI_Send(&max, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
     } else {
         word = malloc(sb.st_size - line_size[rank] + 1);
@@ -183,8 +181,6 @@ int main(int argc, char** argv) {
 
         fread(word, sb.st_size - line_size[rank], 1, fp);
         word[sb.st_size - line_size[rank] + 1] = '\0';
-
-        printf("%d : %s\n", rank, word);
 
         int received_max;
         MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -202,7 +198,6 @@ int main(int argc, char** argv) {
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
-        printf("%d : (key : %d, value : %d)\n", rank, key, value);
         create(key, value);
 
         token = strtok(NULL, "\n");
@@ -226,7 +221,7 @@ int main(int argc, char** argv) {
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
 
     if (rank == 0) {
-        int i, j;
+        int i;
         float sum;
         int num;
         for(i=0; i<max; i++){

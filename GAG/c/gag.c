@@ -154,7 +154,7 @@ int main(int agrc, char** argv){
             num = list_node[i].num;
 
             // Uncomment it if you want to print the result
-            printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);  
+            // printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);  
         }
     }
 

@@ -183,8 +183,6 @@ int main(int argc, char** argv) {
         }
         free_word[i] = array_word[i];
         fclose(fp);
-
-        printf("ID : %d, %s\n", i, array_word[i]);
     }
     free(line_size);
     file_time = omp_get_wtime();
@@ -205,7 +203,6 @@ int main(int argc, char** argv) {
 
         while( (token = strtok_r(array_word[i], "\n", &array_word[i])) ){
             sscanf(token, "<%d,%d>", &key, &value);
-            printf("ID : %d, insert node (key : %d, value : %d)\n", i, key, value);
             create(key, value, i);
         }
     }
@@ -223,13 +220,6 @@ int main(int argc, char** argv) {
     }
     printf("finish aggregation\n");
     agg_time = omp_get_wtime();
-
-    int j;
-    for (i= 0; i<NUM_THREADS; i++){
-        for (j=0; j<max; j++){
-            printf("ID : %d, key : %d, num : %d, sum : %d\n", i, j, num_array[i][j], sum_array[i][j]);
-        }
-    }
 
     //////////////////////////////////// REDUCE ////////////////////////////////////
 
@@ -255,7 +245,7 @@ int main(int argc, char** argv) {
             sum = reduce_sum_array[i];
 
             // Uncomment it if you want to print the result
-            printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);   
+            // printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);   
         }
     }
     printf("finish print result\n");
