@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
         printf("num : %d\n", hash_table->count);
         migrate(final_words, hash_table, 0, hash_table->size, 0, hash_table->count);
 
-        qsort(&words[0], final_words->count, sizeof(Max_length), cmp_count);
+        qsort(&final_words[0], final_words->count, sizeof(MAX_COUNT), cmp_count);
         after_comm_time = MPI_Wtime();
         printf("%d rank : Complete tasks after MPI\n", rank);
 
