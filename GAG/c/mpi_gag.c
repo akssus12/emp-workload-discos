@@ -236,17 +236,21 @@ int main(int argc, char** argv) {
                 // printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
             }
         }
-    }
-    printf("finish print result\n");
-    end_time = MPI_Wtime();
 
-    //////////////////////////////////// TIME ////////////////////////////////////
-    printf("\nTotaltime = %f seconds\n", end_time-start_time);
-    printf("\nstart-file = %f seconds\n", file_time-start_time);
-    printf("\nfile-create = %f seconds\n", create_time-file_time);
-    printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
-    printf("\naggregation-reduction = %f seconds\n", reduce_time-agg_time);
-    printf("\nreduction-end = %f seconds\n", end_time-reduce_time);
+        printf("finish print result\n");
+        end_time = MPI_Wtime();
+
+        //////////////////////////////////// TIME ////////////////////////////////////
+        printf("\nTotaltime = %f seconds\n", end_time-start_time);
+        printf("\nstart-file = %f seconds\n", file_time-start_time);
+        printf("\nfile-create = %f seconds\n", create_time-file_time);
+        printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
+        printf("\naggregation-reduction = %f seconds\n", reduce_time-agg_time);
+        printf("\nreduction-end = %f seconds\n", end_time-reduce_time);
+    }
+    
+
+    
 
     //////////////////////////////////// FREE ////////////////////////////////////
 

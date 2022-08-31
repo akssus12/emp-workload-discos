@@ -8,9 +8,9 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-long getSpecificSize(char *name, int target_line){
+long* getSpecificSize(char *name, int target_line){
     FILE *ptr;
-    long size=0;
+    long* size = calloc(2, sizeof(long));
     int line=0;
     char c;
 
@@ -20,14 +20,16 @@ long getSpecificSize(char *name, int target_line){
     }
     
     while((c=fgetc(ptr))!=EOF){
-        if( line != target_line ) {
-            size ++;
-            if( c == '\n') {
-                line ++;
-            }
-        } else {
-            break;
+        size[1] ++;
+        if(c=='\n'){
+            line ++;
         }
+        if (line >= 1){
+            if( line != target_line ) {
+                size[0] ++;
+            } else
+                break;
+        } 
     }
 
     fseek(ptr, 0, SEEK_SET);
@@ -96,7 +98,6 @@ void create(int key, int data){
     new_node->next = NULL;
     // If it is first node
     if (list_node[key].num == 0){
-        //Init the start
         list_node[key].next = new_node;
         list_node[key].num++;
     } else {
@@ -137,22 +138,21 @@ int main(int argc, char** argv) {
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
 
     struct stat sb;
-    struct timeval start,end, execution_1, mpi, file, execution_2;
-    double totaltime, start_file, file_exe1, exe1_mpi, mpi_exe2;
+    double start_time, file_time, create_time, agg_time, reduce_time, end_time;
     char filename[256];
     int key, value;
     int total_line;
-    long line_size;
+    
     char* word;
     int max = 0;
 
     strcpy(filename, argv[1]);
-
-    gettimeofday(&start, NULL);
-
     total_line = atoi(argv[2]);
     total_line -= 1;
-    line_size = getSpecificSize(filename, (int)total_line/2);
+
+    start_time = MPI_Wtime();
+    //////////////////////////////////// READ FILE ////////////////////////////////////
+    long* line_size = getSpecificSize(filename, (int)total_line/2);
 
     FILE * fp;
     fp = fopen(filename, "r");
@@ -161,63 +161,69 @@ int main(int argc, char** argv) {
     }
 
     stat(argv[1], &sb);
-
     if (rank == 0){
-        word = malloc(line_size + 1);
-        memset(word, 0, line_size + 1);
+        word = malloc(line_size[rank] + 1);
+        memset(word, 0, line_size[rank] + 1);
 
         fseek(fp, 0, SEEK_SET);
-
         fscanf(fp, "%d\n", &max);
+        max = 1;                        // FOR AG
 
-        fread(word, line_size + 1, 1, fp);
-        word[line_size + 1] = '\0';
+        fread(word, line_size[rank] + 1, 1, fp);
+        word[line_size[rank] + 1] = '\0';
 
-        // In ag workload, max is fixed to 1. so, doesn't need to mpi operation
-
+        MPI_Send(&max, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
     } else {
-        word = malloc(sb.st_size - line_size + 1);
-        memset(word, 0, sb.st_size - line_size + 1);
+        word = malloc(sb.st_size - line_size[rank] + 1);
+        memset(word, 0, sb.st_size - line_size[rank] + 1);
 
         fseek(fp, 0, SEEK_SET);
-        fseek(fp, line_size, SEEK_SET);
+        fseek(fp, line_size[rank], SEEK_SET);
 
-        fread(word, sb.st_size - line_size, 1, fp);
-        word[sb.st_size - line_size + 1] = '\0';
+        fread(word, sb.st_size - line_size[rank], 1, fp);
+        word[sb.st_size - line_size[rank] + 1] = '\0';
 
+        int received_max;
+        MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        max = received_max;
     }
-    max = 1;
+    free(line_size);
+    fclose(fp);
 
-    gettimeofday(&file, NULL);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
+    file_time = MPI_Wtime();
+    printf("Complete reading files in the word\n");
+    //////////////////////////////////// INSERT DATA INTO NODE ////////////////////////////////////
     init(max);
 
     char * token = strtok(word, "\n");
 
     while( token != NULL ){
         sscanf(token, "<%d,%d>", &key, &value);
-        key = 0;
+        key = 0;                    // FOR AG
         create(key, value);
 
         token = strtok(NULL, "\n");
     }
     printf("finish insert node\n");
+    create_time = MPI_Wtime();
+    //////////////////////////////////// AGGREGATE ////////////////////////////////////
+
     aggregate(max);
     printf("finish aggregation\n");
 
-    gettimeofday(&execution_1, NULL);
+    agg_time = MPI_Wtime();
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
+    //////////////////////////////////// REDUCE ////////////////////////////////////
     MPI_Reduce(sum_array, received_sum_array, max, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(num_array, received_num_array, max, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    gettimeofday(&mpi, NULL);
+    printf("finish reduction\n");
+    reduce_time = MPI_Wtime();
+
+    //////////////////////////////////// PRINT RESULT ////////////////////////////////////
 
     if (rank == 0) {
-        int i, j;
+        int i;
         float sum;
         int num;
         for(i=0; i<max; i++){
@@ -228,10 +234,27 @@ int main(int argc, char** argv) {
                 sum = received_sum_array[i];
 
                 // Uncomment it if you want to print the result
+
                 // printf("final key: %d | num: %d | sum: %f | avg: %f\n", i, num, sum, sum/num);
             }
         }
+
+        printf("finish print result\n");
+        end_time = MPI_Wtime();
+
+        //////////////////////////////////// TIME ////////////////////////////////////
+        printf("\nTotaltime = %f seconds\n", end_time-start_time);
+        printf("\nstart-file = %f seconds\n", file_time-start_time);
+        printf("\nfile-create = %f seconds\n", create_time-file_time);
+        printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
+        printf("\naggregation-reduction = %f seconds\n", reduce_time-agg_time);
+        printf("\nreduction-end = %f seconds\n", end_time-reduce_time);
     }
+    
+
+    
+
+    //////////////////////////////////// FREE ////////////////////////////////////
 
     destroy(max);
     printf("finish destroy\n");
@@ -243,24 +266,6 @@ int main(int argc, char** argv) {
     free(received_num_array);
     free(received_sum_array);
 
-    gettimeofday(&execution_2, NULL);
-    gettimeofday(&end, NULL);
-
-    if (rank == 0){
-        start_file = (((file.tv_usec - start.tv_usec) / 1.0e6 + file.tv_sec - start.tv_sec) * 1000) / 1000;
-        file_exe1 = (((execution_1.tv_usec - file.tv_usec) / 1.0e6 + execution_1.tv_sec - file.tv_sec) * 1000) / 1000;
-        exe1_mpi = (((mpi.tv_usec - execution_1.tv_usec) / 1.0e6 + mpi.tv_sec - execution_1.tv_sec) * 1000) / 1000;
-        mpi_exe2 = (((execution_2.tv_usec - mpi.tv_usec) / 1.0e6 + execution_2.tv_sec - mpi.tv_sec) * 1000) / 1000;
-        totaltime = (((end.tv_usec - start.tv_usec) / 1.0e6 + end.tv_sec - start.tv_sec) * 1000) / 1000;
-
-        printf("start_file = %f seconds\n", start_file);
-        printf("file_exe1 = %f seconds\n", file_exe1);
-        printf("exe1_mpi = %f seconds\n", exe1_mpi);
-        printf("mpi_exe2 = %f seconds\n", mpi_exe2);
-        printf("\nTotaltime = %f seconds\n", totaltime);
-    }
-
     MPI_Finalize();
-
     return 0;
 }

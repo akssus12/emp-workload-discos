@@ -1,21 +1,26 @@
-all: ag ag_test mpi_ag mpi_ag_test
+CC=gcc
+CFLAGS=-g -Wall
 
-CC = gcc
+OBJS=ag.c
+TARGET=ag.out
 
-ag: ag.c
-	gcc ag.c -o ag
+OBJS_OMP=omp_ag.c
+TARGET_OMP=omp_ag.out
 
-ag_test: ag_test.c
-	gcc ag_test.c -o ag_test
+OBJS_MPI=mpi_ag.c
+TARGET_MPI=mpi_ag.out
 
-mpi_ag: mpi_ag.c
-	mpicc mpi_ag.c -o mpi_ag
-
-mpi_ag_test: mpi_ag_test.c
-	mpicc mpi_ag_test.c -o mpi_ag_test
+all: $(TARGET) $(TARGET_MPI) $(TARGET_OMP)
 
 clean:
-	rm ag
-	rm ag_test
-	rm mpi_ag
-	rm mpi_ag_test
+	rm -f *.o
+	rm -f *.out
+
+$(TARGET) : $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
+
+$(TARGET_OMP) : $(OBJS_OMP)
+	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP)
+
+$(TARGET_MPI) : $(OBJS_MPI)
+	mpicc $(CFLAGS) -o $@ $(OBJS_MPI)
