@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
     // Iterate again to print output.
-    // for (int i = 0; i < num_words; i++) {
+    // for (int i = 0; i < final_table->count; i++) {
     //     printf("%s %d\n", words[i].word, words[i].count);
     // }
     exec_time = omp_get_wtime();

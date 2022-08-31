@@ -8,9 +8,9 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-long getSpecificSize(char *name, int target_line){
+long* getSpecificSize(char *name, int target_line){
     FILE *ptr;
-    long size=0;
+    long* size = calloc(2, sizeof(long));
     int line=0;
     char c;
 
@@ -20,14 +20,16 @@ long getSpecificSize(char *name, int target_line){
     }
     
     while((c=fgetc(ptr))!=EOF){
-        if( line != target_line ) {
-            size ++;
-            if( c == '\n') {
-                line ++;
-            }
-        } else {
-            break;
+        size[1] ++;
+        if(c=='\n'){
+            line ++;
         }
+        if (line >= 1){
+            if( line != target_line ) {
+                size[0] ++;
+            } else
+                break;
+        } 
     }
 
     fseek(ptr, 0, SEEK_SET);
@@ -35,6 +37,7 @@ long getSpecificSize(char *name, int target_line){
 
     return(size);
 }
+
 
 int main(int argc, char** argv) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -49,12 +52,12 @@ int main(int argc, char** argv) {
     strcpy(filename, argv[1]);
     strcpy(target, argv[3]);
     int total_line = atoi(argv[2]);
-    long line_size = getSpecificSize(filename, (int)total_line/2);
 
     start_time = omp_get_wtime();
     //////////////////////////////////// READ FILE ////////////////////////////////////
     struct stat sb;
     stat(argv[1], &sb);
+    long* line_size = getSpecificSize(filename, (int)total_line/2);
     FILE *fp;
     char ** array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
 
@@ -68,23 +71,24 @@ int main(int argc, char** argv) {
         }
 
         if (i%2 == 0){
-            array_word[i] = malloc(line_size + 1);
-            memset(array_word[i], 0, line_size + 1);
+            array_word[i] = malloc(line_size[i] + 1);
+            memset(array_word[i], 0, line_size[i] + 1);
 
-            fread(array_word[i], line_size, 1, fp);
-            array_word[i][line_size + 1] = '\0';
+            fread(array_word[i], line_size[i], 1, fp);
+            array_word[i][line_size[i] + 1] = '\0';
         } else {
-            array_word[i] = malloc(sb.st_size - line_size + 1);
-            memset(array_word[i], 0, sb.st_size - line_size + 1);
+            array_word[i] = malloc(sb.st_size - line_size[i] + 1);
+            memset(array_word[i], 0, sb.st_size - line_size[i] + 1);
 
-            fseek(fp, line_size, SEEK_SET);
+            fseek(fp, line_size[i], SEEK_SET);
 
-            fread(array_word[i], sb.st_size - line_size, 1, fp);
-            array_word[i][sb.st_size - line_size + 1] = '\0';
+            fread(array_word[i], sb.st_size - line_size[i], 1, fp);
+            array_word[i][sb.st_size - line_size[i] + 1] = '\0';
         }
         
         fclose(fp);
     }
+    free(line_size);
     file_time = omp_get_wtime();
     printf("Complete reading files in the array_word[i]\n");
 

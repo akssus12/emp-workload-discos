@@ -43,8 +43,8 @@ void migrate_MPI(MAX_COUNT* words, HashTable* final_table, int h_start, int h_en
 
 // Comparison function for qsort() ordering by count descending.
 int cmp_count(const void* p1, const void* p2) {
-    int c1 = ((MAX_COUNT*)p1)->count;
-    int c2 = ((MAX_COUNT*)p2)->count;
+    int c1 = ((COUNT*)p1)->count;
+    int c2 = ((COUNT*)p2)->count;
     if (c1 == c2) return 0;
     if (c1 < c2) return 1;
     return -1;
@@ -106,6 +106,7 @@ int main(int argc, char** argv) {
     fread(word, sb.st_size/2, 1, fp);
     file_time = MPI_Wtime();
     printf("%d rank : Complete reading files\n", rank);
+    fclose(fp);
 
     //////////////////////////////////// CONVERT TO LOWERCASE ////////////////////////////////////
     char* p;
@@ -191,14 +192,14 @@ int main(int argc, char** argv) {
         printf("num : %d\n", hash_table->count);
         migrate(final_words, hash_table, 0, hash_table->size, 0, hash_table->count);
 
-        qsort(&final_words[0], final_words->count, sizeof(MAX_COUNT), cmp_count);
+        qsort(&final_words[0], hash_table->count, sizeof(COUNT), cmp_count);
         after_comm_time = MPI_Wtime();
         printf("%d rank : Complete tasks after MPI\n", rank);
 
         //////////////////////////////////// PRINT RESULT ////////////////////////////////////
         // Iterate again to print output.
         // for (i = 0; i < hash_table->count; i++) {
-        //     printf("%s %d\n", words[i].word, words[i].count);
+        //     printf("%s %d\n", final_words[i].word, final_words[i].count);
         // }
         end_time = MPI_Wtime();
 
@@ -221,7 +222,6 @@ int main(int argc, char** argv) {
     }
     
     // [TODO] : need to implemet hashtable free. (occuring invalid pointer)
-    fclose(fp);
     free(words);
     free(word);
 

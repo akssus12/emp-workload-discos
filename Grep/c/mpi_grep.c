@@ -8,9 +8,9 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-long getSpecificSize(char *name, int target_line){
+long* getSpecificSize(char *name, int target_line){
     FILE *ptr;
-    long size=0;
+    long* size = calloc(2, sizeof(long));
     int line=0;
     char c;
 
@@ -20,14 +20,16 @@ long getSpecificSize(char *name, int target_line){
     }
     
     while((c=fgetc(ptr))!=EOF){
-        if( line != target_line ) {
-            size ++;
-            if( c == '\n') {
-                line ++;
-            }
-        } else {
-            break;
+        size[1] ++;
+        if(c=='\n'){
+            line ++;
         }
+        if (line >= 1){
+            if( line != target_line ) {
+                size[0] ++;
+            } else
+                break;
+        } 
     }
 
     fseek(ptr, 0, SEEK_SET);
@@ -50,7 +52,6 @@ int main(int argc, char** argv) {
     strcpy(target, argv[3]);
 
     int total_line = atoi(argv[2]);
-    long line_size = getSpecificSize(filename, (int)total_line/2);
 
     start_time = MPI_Wtime();
 
@@ -58,6 +59,7 @@ int main(int argc, char** argv) {
     char * word;
     struct stat sb;
     stat(argv[1], &sb);
+    long* line_size = getSpecificSize(filename, (int)total_line/2);
 
     FILE *fp;
 
@@ -67,25 +69,26 @@ int main(int argc, char** argv) {
     }
 
     if (rank == 0) {
-        word = malloc(line_size + 1);
-        memset(word, 0, line_size + 1);
+        word = malloc(line_size[rank] + 1);
+        memset(word, 0, line_size[rank] + 1);
     
-        fread(word, line_size, 1, fp);
-        word[line_size + 1] = '\0';
+        fread(word, line_size[rank], 1, fp);
+        word[line_size[rank] + 1] = '\0';
 
     } else {
-        word = malloc(sb.st_size - line_size + 1);
-        memset(word, 0, sb.st_size - line_size + 1);
+        word = malloc(sb.st_size - line_size[rank] + 1);
+        memset(word, 0, sb.st_size - line_size[rank] + 1);
 
-        fseek(fp, line_size, SEEK_SET);
+        fseek(fp, line_size[rank], SEEK_SET);
 
-        fread(word, sb.st_size - line_size, 1, fp);
-        word[sb.st_size - line_size + 1] = '\0';
+        fread(word, sb.st_size - line_size[rank], 1, fp);
+        word[sb.st_size - line_size[rank] + 1] = '\0';
     }
     fclose(fp);
+    free(line_size);
 
     file_time = MPI_Wtime();
-    printf("Complete reading files in the word\n");
+    printf("%d : Complete reading files in the word\n", rank);
 
     //////////////////////////////////// CONVERT TO LOWERCASE ////////////////////////////////////
     // Convert word to lower case in place.
@@ -94,7 +97,7 @@ int main(int argc, char** argv) {
         *p = tolower(*p);
     }
     tolower_time = MPI_Wtime();
-    printf("Complete converting to lowercase\n");
+    printf("%d : Complete converting to lowercase\n", rank);
 
     //////////////////////////////////// SEARCHING TARGET WORD ////////////////////////////////////
     int num_lines = 0;
@@ -129,7 +132,7 @@ int main(int argc, char** argv) {
         start_string = end_string + 1;
     }
     search_time = MPI_Wtime();
-    printf("Complete searching target word\n");
+    printf("%d : Complete searching target word\n", rank);
 
     //////////////////////////////////// MPI ////////////////////////////////////
     int received_num;
@@ -149,7 +152,7 @@ int main(int argc, char** argv) {
     }
 
     communicate_time = MPI_Wtime();
-    printf("Complete MPI\n");
+    printf("%d : Complete MPI\n", rank);
 
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
 
@@ -177,6 +180,8 @@ int main(int argc, char** argv) {
         printf("search-MPI = %f seconds\n", communicate_time-search_time);
         printf("MPI-end = %f seconds\n", end_time-communicate_time);
     }
+    
+    MPI_Barrier( MPI_COMM_WORLD );
 
     free(word);
     free(array_line);
