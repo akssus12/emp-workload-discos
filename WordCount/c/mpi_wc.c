@@ -53,7 +53,7 @@ int cmp_count(const void* p1, const void* p2) {
 int main(int argc, char** argv) {
     // Used to find the file size
     struct stat sb;
-    double start_time, file_time, tolower_time, hashing_time;
+    double start_time, file_time, tolower_time, hashing_time, end_time;
     double migrate_comm_time, communicate_time, after_comm_time;
     MPI_Init( &argc, &argv );
     int rank, size;
@@ -195,16 +195,24 @@ int main(int argc, char** argv) {
         after_comm_time = MPI_Wtime();
         printf("%d rank : Complete tasks after MPI\n", rank);
 
+        //////////////////////////////////// PRINT RESULT ////////////////////////////////////
+        // Iterate again to print output.
+        // for (i = 0; i < hash_table->count; i++) {
+        //     printf("%s %d\n", words[i].word, words[i].count);
+        // }
+        end_time = MPI_Wtime();
+
         //////////////////////////////////// TIME ////////////////////////////////////
 
         printf(" number of words : %d\n", hash_table->count);
-        printf("\n Totaltime = %.6f seconds\n", after_comm_time-start_time);
+        printf("\n Totaltime = %.6f seconds\n", end_time-start_time);
         printf("\n start-file = %.6f seconds\n", file_time-start_time);
         printf("\n file-tolower = %.6f seconds\n", tolower_time-file_time);
         printf("\n tolower-hashing = %.6f seconds\n", hashing_time-tolower_time);
         printf("\n hashing-migrate_comm = %.6f seconds\n", migrate_comm_time-hashing_time);
         printf("\n migrate_comm-communication = %.6f seconds\n", communicate_time-migrate_comm_time);
         printf("\n communication-after_comm = %.6f seconds\n", after_comm_time-communicate_time);
+        printf("\n after_comm-end_time = %.6f seconds\n", end_time-after_comm_time);
 
         //////////////////////////////////// FREE ////////////////////////////////////
 
