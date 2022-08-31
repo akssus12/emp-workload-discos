@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
     fclose(fp);
 
     file_time = MPI_Wtime();
-    printf("Complete reading files in the word\n");
+    printf("%d : Complete reading files in the word\n", rank);
     //////////////////////////////////// INSERT DATA INTO NODE ////////////////////////////////////
     init(max);
 
@@ -202,12 +202,12 @@ int main(int argc, char** argv) {
 
         token = strtok(NULL, "\n");
     }
-    printf("finish insert node\n");
+    printf("%d : finish insert node\n", rank);
     create_time = MPI_Wtime();
     //////////////////////////////////// AGGREGATE ////////////////////////////////////
 
     aggregate(max);
-    printf("finish aggregation\n");
+    printf("%d : finish aggregation\n", rank);
 
     agg_time = MPI_Wtime();
 
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
     MPI_Reduce(sum_array, received_sum_array, max, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(num_array, received_num_array, max, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    printf("finish reduction\n");
+    printf("%d : finish reduction\n", rank);
     reduce_time = MPI_Wtime();
 
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
     //////////////////////////////////// FREE ////////////////////////////////////
 
     destroy(max);
-    printf("finish destroy\n");
+    printf("%d : finish destroy\n", rank);
 
     free(word);
     free(list_node);

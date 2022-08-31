@@ -4,22 +4,13 @@ CFLAGS=-g -Wall
 OBJS=wc.c
 TARGET=wc.out
 
-OBJS_TEST=wc_test.c
-TARGET_TEST=wc_test.out
-
 OBJS_OMP=omp_wc.c
 TARGET_OMP=omp_wc.out
-
-OBJS_OMP_TEST=omp_wc_test.c
-TARGET_OMP_TEST=omp_wc_test.out
 
 OBJS_MPI=mpi_wc.c
 TARGET_MPI=mpi_wc.out
 
-OBJS_MPI_TEST=mpi_wc_test.c
-TARGET_MPI_TEST=mpi_wc_test.out
-
-all: $(TARGET) $(TARGET_TEST) $(TARGET_MPI) $(TARGET_MPI_TEST) $(TARGET_OMP) $(TARGET_OMP_TEST)
+all: $(TARGET) $(TARGET_MPI) $(TARGET_OMP)
 
 clean:
 	rm -f *.o
@@ -28,17 +19,8 @@ clean:
 $(TARGET) : $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-$(TARGET_TEST) : $(OBJS_TEST)
-	$(CC) $(CFLAGS) -o $@ $(OBJS_TEST)
-
 $(TARGET_OMP) : $(OBJS_OMP)
 	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP)
 
-$(TARGET_OMP_TEST) : $(OBJS_OMP_TEST)
-	$(CC) $(CFLAGS) -fopenmp -o $@ $(OBJS_OMP_TEST)
-
 $(TARGET_MPI) : $(OBJS_MPI)
 	mpicc $(CFLAGS) -o $@ $(OBJS_MPI)
-
-$(TARGET_MPI_TEST) : $(OBJS_MPI_TEST)
-	mpicc $(CFLAGS) -o $@ $(OBJS_MPI_TEST)
