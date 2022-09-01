@@ -38,7 +38,6 @@ long* getSpecificSize(char *name, int target_line){
     return(size);
 }
 
-
 int main(int argc, char** argv) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions

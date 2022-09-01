@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
     printf("Complete redecing hashtable\n");
 
     //////////////////////////////////// MIGRATE WORD TO ARRAY ////////////////////////////////////
-    COUNT* words = (COUNT*)calloc(final_table->count, sizeof(COUNT*));
+    COUNT* words = (COUNT*)calloc(final_table->count, sizeof(COUNT));
     #pragma omp parallel shared(final_table, words) private(i)
     {
         int id = omp_get_thread_num();

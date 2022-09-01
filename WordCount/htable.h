@@ -190,7 +190,8 @@ void ht_print(HashTable *h)
 void reduce(HashTable **hash_tables, HashTable *final_table, int num_hashtables, int location)
 {
     Node *node = NULL;
-    for (int i = 0; i < num_hashtables; i++)
+    int i;
+    for (i = 0; i < num_hashtables; i++)
     {
         if (hash_tables[i] == NULL || hash_tables[i]->nodes[location] == NULL)
         {
