@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
     struct stat sb;
     stat(argv[1], &sb);
 
-    size_t* line_size = getSpecificSize(filename, (int)total_line/2);
+    size_t* line_size = getSpecificSize_getline(filename, (int)total_line/2);
     getsize_time = omp_get_wtime();
     //////////////////////////////////// READ FILE ////////////////////////////////////
 

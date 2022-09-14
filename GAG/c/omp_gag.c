@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
     int NUM_THREADS = 2;
 
-    double start_time, , getsize_time, file_time, create_time, agg_time, reduce_time, end_time; 
+    double start_time, getsize_time, file_time, create_time, agg_time, reduce_time, end_time; 
     char filename[256];
     int total_line;
     int max = 0;
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
     struct stat sb;
     stat(argv[1], &sb);
 
-    size_t* line_size = getSpecificSize(filename, (int)total_line/2);
+    size_t* line_size = getSpecificSize_getline(filename, (int)total_line/2);
     getsize_time = omp_get_wtime();
 
     //////////////////////////////////// READ FILE ////////////////////////////////////

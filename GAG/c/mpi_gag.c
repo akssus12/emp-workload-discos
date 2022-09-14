@@ -213,6 +213,7 @@ int main(int argc, char** argv) {
         MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         max = received_max;
     }
+    free(line_size);
     free(received_line_size);
     fclose(fp);
 

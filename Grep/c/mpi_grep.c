@@ -184,17 +184,17 @@ int main(int argc, char** argv) {
 
     if (rank == 0){
         // Uncomment it if you want to print the target line
-        printf("num : %d\n", num);
-        printf("received_num : %d\n", received_num);
-        for (int i=0; i<num-1; i++){
-            printf("%d\n", array_line[i]);
-        }
+        // printf("num : %d\n", num);
+        // printf("received_num : %d\n", received_num);
+        // for (int i=0; i<num-1; i++){
+        //     printf("%d\n", array_line[i]);
+        // }
 
-        for (int i=0; i<received_num-1; i++){
-            printf("%d\n", total_line/2 + received_array_line[i]);
-        }
+        // for (int i=0; i<received_num-1; i++){
+        //     printf("%d\n", total_line/2 + received_array_line[i]);
+        // }
         if(received_num > 0){
-            // free(received_array_line);
+            free(received_array_line);
         }
     }
     
@@ -212,13 +212,8 @@ int main(int argc, char** argv) {
         printf("MPI-end = %f seconds\n", end_time-communicate_time);
     }
     
-    MPI_Barrier( MPI_COMM_WORLD );
-
-    printf("rank : %d debug0\n", rank);
-    // free(word);
-    printf("rank : %d debug1\n", rank);
-    // free(array_line);
-    printf("rank : %d debug2\n", rank);
+    free(word);
+    free(array_line);
     
     MPI_Finalize();
     return 0;

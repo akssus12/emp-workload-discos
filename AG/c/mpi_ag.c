@@ -202,20 +202,21 @@ int main(int argc, char** argv) {
 
         MPI_Send(&max, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
     } else {
-        word = malloc(sb.st_size - line_size[rank] + 1);
-        memset(word, 0, sb.st_size - line_size[rank] + 1);
+        word = malloc(sb.st_size - received_line_size[rank] + 1);
+        memset(word, 0, sb.st_size - received_line_size[rank] + 1);
 
         fseek(fp, 0, SEEK_SET);
-        fseek(fp, line_size[rank], SEEK_SET);
+        fseek(fp, received_line_size[rank], SEEK_SET);
 
-        fread(word, sb.st_size - line_size[rank], 1, fp);
-        word[sb.st_size - line_size[rank] + 1] = '\0';
+        fread(word, sb.st_size - received_line_size[rank], 1, fp);
+        word[sb.st_size - received_line_size[rank] + 1] = '\0';
 
         int received_max;
         MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         max = received_max;
     }
     free(line_size);
+    free(received_line_size);
     fclose(fp);
 
     file_time = MPI_Wtime();
