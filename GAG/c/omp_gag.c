@@ -8,29 +8,31 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-long* getSpecificSize(char *name, int target_line){
+size_t* getSpecificSize_getline(char *name, int target_line){
     FILE *ptr;
-    long* size = calloc(2, sizeof(long));
+    size_t* size = calloc(2, sizeof(size_t));
     int line=0;
-    char c;
+    char *tmp_line = NULL;
+    size_t len = 0;
+    ssize_t read;
 
     ptr=fopen(name,"r");
     if (ptr == NULL) {
         printf("Error opening data file\n");
     }
     
-    while((c=fgetc(ptr))!=EOF){
-        size[1] ++;
-        if(c=='\n'){
-            line ++;
-        }
+    while((read = getline(&tmp_line, &len, ptr)) != -1) {
+        size[1] += (size_t)read;
+        line ++;
+        
         if (line >= 1){
             if( line != target_line ) {
-                size[0] ++;
+                size[0] += (size_t)read;
             } else
                 break;
         } 
     }
+    free(tmp_line);
 
     fseek(ptr, 0, SEEK_SET);
     fclose(ptr);
@@ -135,8 +137,7 @@ int main(int argc, char** argv) {
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
     int NUM_THREADS = 2;
 
-    struct stat sb;
-    double start_time, file_time, create_time, agg_time, reduce_time, end_time; 
+    double start_time, , getsize_time, file_time, create_time, agg_time, reduce_time, end_time; 
     char filename[256];
     int total_line;
     int max = 0;
@@ -147,10 +148,14 @@ int main(int argc, char** argv) {
     total_line -= 1;
 
     start_time = omp_get_wtime();
-    //////////////////////////////////// READ FILE ////////////////////////////////////
-    long* line_size = getSpecificSize(filename, (int)total_line/2);
+    //////////////////////////////////// GET THE FILE SIZE UP TO A SPECIFIC LINE //////////////////////////////////// 
+    struct stat sb;
     stat(argv[1], &sb);
 
+    size_t* line_size = getSpecificSize(filename, (int)total_line/2);
+    getsize_time = omp_get_wtime();
+
+    //////////////////////////////////// READ FILE ////////////////////////////////////
     FILE * fp;
     char ** array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
     char* free_word[2];
@@ -253,7 +258,8 @@ int main(int argc, char** argv) {
 
     //////////////////////////////////// TIME ////////////////////////////////////
     printf("\nTotaltime = %f seconds\n", end_time-start_time);
-    printf("\nstart-file = %f seconds\n", file_time-start_time);
+    printf("start_getsize = %f seconds\n", getsize_time-start_time);
+    printf("getsize_file = %f seconds\n", file_time-getsize_time);
     printf("\nfile-create = %f seconds\n", create_time-file_time);
     printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
     printf("\naggregation-reduction = %f seconds\n", reduce_time-agg_time);

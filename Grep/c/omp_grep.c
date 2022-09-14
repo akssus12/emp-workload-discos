@@ -8,29 +8,29 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-long* getSpecificSize(char *name, int target_line){
+size_t getSpecificSize_getline(char *name, int target_line){
     FILE *ptr;
-    long* size = calloc(2, sizeof(long));
+    size_t size =0;
     int line=0;
-    char c;
+    char *tmp_line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    //char c;
 
-    ptr=fopen(name,"r");
+    ptr=fopen(name, "r");
     if (ptr == NULL) {
         printf("Error opening data file\n");
     }
     
-    while((c=fgetc(ptr))!=EOF){
-        size[1] ++;
-        if(c=='\n'){
-            line ++;
+    while((read = getline(&tmp_line, &len, ptr)) != -1) {
+        if( line != target_line ){
+            size += (size_t)read;
+            line++;
+        } else { 
+            break;
         }
-        if (line >= 1){
-            if( line != target_line ) {
-                size[0] ++;
-            } else
-                break;
-        } 
     }
+    free(tmp_line);
 
     fseek(ptr, 0, SEEK_SET);
     fclose(ptr);
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
     int NUM_THREADS = 2;
 
-    double start_time, file_time, tolower_time, search_time, end_time; 
+    double start_time, getsize_time, file_time, tolower_time, search_time, end_time; 
     char filename[256];
     char target[256];
     int i, j;
@@ -53,10 +53,14 @@ int main(int argc, char** argv) {
     int total_line = atoi(argv[2]);
 
     start_time = omp_get_wtime();
-    //////////////////////////////////// READ FILE ////////////////////////////////////
+    //////////////////////////////////// GET THE FILE SIZE UP TO A SPECIFIC LINE //////////////////////////////////// 
+    
     struct stat sb;
     stat(argv[1], &sb);
-    long* line_size = getSpecificSize(filename, (int)total_line/2);
+
+    size_t line_size = getSpecificSize_getline(filename, (int)total_line/2);
+    getsize_time = omp_get_wtime();
+    //////////////////////////////////// READ FILE ////////////////////////////////////
     FILE *fp;
     char ** array_word = (char **)malloc(sizeof(char *) * NUM_THREADS);
 
@@ -70,24 +74,23 @@ int main(int argc, char** argv) {
         }
 
         if (i%2 == 0){
-            array_word[i] = malloc(line_size[i] + 1);
-            memset(array_word[i], 0, line_size[i] + 1);
+            array_word[i] = malloc(line_size + 1);
+            memset(array_word[i], 0, line_size + 1);
 
-            fread(array_word[i], line_size[i], 1, fp);
-            array_word[i][line_size[i] + 1] = '\0';
+            fread(array_word[i], line_size, 1, fp);
+            array_word[i][line_size + 1] = '\0';
         } else {
-            array_word[i] = malloc(sb.st_size - line_size[i] + 1);
-            memset(array_word[i], 0, sb.st_size - line_size[i] + 1);
+            array_word[i] = malloc(sb.st_size - line_size + 1);
+            memset(array_word[i], 0, sb.st_size - line_size + 1);
 
-            fseek(fp, line_size[i], SEEK_SET);
+            fseek(fp, line_size, SEEK_SET);
 
-            fread(array_word[i], sb.st_size - line_size[i], 1, fp);
-            array_word[i][sb.st_size - line_size[i] + 1] = '\0';
+            fread(array_word[i], sb.st_size - line_size, 1, fp);
+            array_word[i][sb.st_size - line_size + 1] = '\0';
         }
         
         fclose(fp);
     }
-    free(line_size);
     file_time = omp_get_wtime();
     printf("Complete reading files in the array_word[i]\n");
 
@@ -158,7 +161,8 @@ int main(int argc, char** argv) {
 
     //////////////////////////////////// TIME ////////////////////////////////////
     printf("\nTotaltime = %.6f seconds\n", end_time-start_time);
-    printf("\nstart-file = %.6f seconds\n", file_time-start_time);
+    printf("start_getsize = %f seconds\n", getsize_time-start_time);
+    printf("getsize_file = %f seconds\n", file_time-getsize_time);
     printf("\nfile-tolower = %.6f seconds\n", tolower_time-file_time);
     printf("\ntolower-search  = %.6f seconds\n", search_time-tolower_time);
     printf("\nsearch-end  = %.6f seconds\n", end_time-search_time);
