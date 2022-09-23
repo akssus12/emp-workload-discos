@@ -357,7 +357,6 @@ int main(int argc, char** argv) {
     printf("\nmigrate-qsort = %.6f seconds\n", qsort_time-migrate_time);
 
     //////////////////////////////////// FREE ////////////////////////////////////
-    // [TODO] : need to implemet hashtable free. (occuring invalid pointer)
     for(i=0; i<total_line; i++){
         free(free_array[i]);
     }

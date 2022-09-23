@@ -462,7 +462,6 @@ int main(int argc, char** argv) {
         printf("\n after_comm-end_time = %.6f seconds\n", end_time-after_comm_time);
 
         //////////////////////////////////// FREE ////////////////////////////////////
-
         free(final_words);
         free(receive_words);
     }
