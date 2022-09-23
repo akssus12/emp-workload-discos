@@ -213,11 +213,10 @@ int cmp_count(const void* p1, const void* p2) {
 int main(int argc, char** argv) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
-    int NUM_THREADS = 2;
 
     // Used to find the file size
     struct stat sb;
-    double start_time, file_time, exec_time, tolower_time, hashing_time, reduce_time, migrate_time, qsort_time;
+    double start_time, file_time, exec_time, tolower_time, hashing_time, migrate_time, qsort_time;
     char filename[256];
     strcpy(filename, argv[1]);
     int total_line = atoi(argv[2]);
@@ -273,7 +272,7 @@ int main(int argc, char** argv) {
     char **free_array = (char **)calloc(total_line, sizeof(char*));
 
     bool is_alpha;
-    char *string, *free_string, *token, *start_string, *end_string;
+    char *token;
     int j;
 
     #pragma omp parallel for schedule(dynamic) shared(array_word1, free_array, hash_table) private(i, j, token)
@@ -324,7 +323,7 @@ int main(int argc, char** argv) {
         if(id == 0){
             c_start = 0;
             c_end = len_words[MAX_UNIQUES/total_thread];
-        } else {
+        } else
             c_start = len_words[MAX_UNIQUES/total_thread];
             c_end = hash_table->count;
         }
