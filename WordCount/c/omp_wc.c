@@ -320,10 +320,10 @@ int main(int argc, char** argv) {
         int c_start = 0;
         int c_end = 0;
 
-        if(id == 0){
+        if(id == 0) {
             c_start = 0;
             c_end = len_words[MAX_UNIQUES/total_thread];
-        } else
+        } else {
             c_start = len_words[MAX_UNIQUES/total_thread];
             c_end = hash_table->count;
         }
