@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
         memset(word, 0, line_size + 1);
     
         fread(word, line_size, 1, fp);
-        word[line_size + 1] = '\0';
+        word[line_size] = '\0';
 
     } else {
         word = malloc(sb.st_size - received_line_size + 1);
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
         fseek(fp, received_line_size, SEEK_SET);
 
         fread(word, sb.st_size - received_line_size, 1, fp);
-        word[sb.st_size - received_line_size + 1] = '\0';
+        word[sb.st_size - received_line_size] = '\0';
     }
     fclose(fp);
 

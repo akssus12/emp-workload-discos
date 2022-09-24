@@ -113,7 +113,7 @@ int main(int agrc, char** argv){
     stat(argv[1], &sb);
     char* word = malloc(sb.st_size+1);
     memset(word, 0, sb.st_size+1);
-    word[sb.st_size+1] = '\0';
+    word[sb.st_size] = '\0';
 
     // find max_key
     int max;
@@ -122,7 +122,7 @@ int main(int agrc, char** argv){
     printf("max: %d\n", max);
 
     fread(word, sb.st_size+1, 1, fp);
-    word[sb.st_size+1] = '\0';
+    word[sb.st_size] = '\0';
 
     printf("Complete reading files\n");
     gettimeofday(&file_t, NULL);

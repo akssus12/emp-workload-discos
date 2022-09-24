@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
     }
     free(tmp_line);
     fclose(ptr);
-
+    
     file_time = omp_get_wtime();
     printf("Complete reading files in the array_word[i]\n");
 
@@ -280,15 +280,17 @@ int main(int argc, char** argv) {
         free_array[i] = array_word1[i];
         is_alpha = true;
 
-        while(( token = strtok_r(array_word1[i], " ", &array_word1[i] ))) {
+        while(( token = strtok_r(array_word1[i], " \n", &array_word1[i] ))) {
             for( j=0; token[j] != '\0'; j++ ){
                if ( isalpha(token[j]) == 0 ) {
+                    printf("what the fuck? 1\n");
                     is_alpha = false;
                     break;
                }
             }
 
             if ( !is_alpha || strlen(token) >= 50 || token[0] =='\n'){
+                printf("what the fuck? 2\n");
                 is_alpha = true;
                 continue;
             }

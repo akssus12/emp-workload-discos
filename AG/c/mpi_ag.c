@@ -197,8 +197,8 @@ int main(int argc, char** argv) {
         fscanf(fp, "%d\n", &max);
         max = 1;                        // FOR AG
 
-        fread(word, line_size[rank] + 1, 1, fp);
-        word[line_size[rank] + 1] = '\0';
+        fread(word, line_size[rank], 1, fp);
+        word[line_size[rank]] = '\0';
 
         MPI_Send(&max, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
     } else {
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
         fseek(fp, received_line_size[rank], SEEK_SET);
 
         fread(word, sb.st_size - received_line_size[rank], 1, fp);
-        word[sb.st_size - received_line_size[rank] + 1] = '\0';
+        word[sb.st_size - received_line_size[rank]] = '\0';
 
         int received_max;
         MPI_Recv(&received_max, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);

@@ -31,11 +31,11 @@ int main(int argc, char** argv) {
     stat(argv[1], &sb);
     char* word = malloc(sb.st_size+1);
     memset(word, 0, sb.st_size+1);
-    word[sb.st_size+1] = '\0';
+    word[sb.st_size] = '\0';
 
     //fscanf(fp,"%100s", word);
     fread(word, sb.st_size+1, 1, fp);
-    word[sb.st_size+1] = '\0';
+    word[sb.st_size] = '\0';
 
     fclose(fp);
 

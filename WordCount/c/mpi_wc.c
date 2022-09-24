@@ -51,6 +51,7 @@ void reduce(HashTable **hash_tables, HashTable *final_table, int num_hashtables,
 void migrate(COUNT* words, HashTable* final_table, int h_start, int h_end, int c_start, int c_end);
 void migrate_MPI(MAX_COUNT* words, HashTable* final_table, int h_start, int h_end, int c_start, int c_end);
 
+int cmp_count(const void* p1, const void* p2);
 size_t getSpecificSize_getline(char *name, int target_line);
 
 struct Node {
@@ -278,7 +279,6 @@ size_t getSpecificSize_getline(char *name, int target_line){
 //////////////////////////////////// MAIN ////////////////////////////////////
 
 int main(int argc, char** argv) {
-    // Used to find the file size
     double start_time, getsize_time, file_time, tolower_time, hashing_time, end_time;
     double migrate_comm_time, communicate_time, after_comm_time;
     MPI_Init( &argc, &argv );
@@ -341,7 +341,7 @@ int main(int argc, char** argv) {
         memset(word, 0, line_size + 1);
     
         fread(word, line_size, 1, fp);
-        word[line_size + 1] = '\0';
+        word[line_size] = '\0';
 
     } else {
         word = malloc(sb.st_size - received_line_size + 1);
@@ -350,7 +350,7 @@ int main(int argc, char** argv) {
         fseek(fp, received_line_size, SEEK_SET);
 
         fread(word, sb.st_size - received_line_size, 1, fp);
-        word[sb.st_size - received_line_size + 1] = '\0';
+        word[sb.st_size - received_line_size] = '\0';
     }
     fclose(fp);
 
@@ -465,7 +465,6 @@ int main(int argc, char** argv) {
         free(final_words);
         free(receive_words);
     }
-    
     free(words);
     free(word);
     free_htable(hash_table);
