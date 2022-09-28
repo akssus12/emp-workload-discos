@@ -265,7 +265,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        printf("finish print result\n");
+        printf("%d : finish print result\n", rank);
         end_time = MPI_Wtime();
     }
 
@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
     free(received_num_array);
     free(received_sum_array);
 
-    printf("finish free\n");
+    printf("%d : finish free\n", rank);
     free_time = MPI_Wtime();
 
     if (rank == 0) {

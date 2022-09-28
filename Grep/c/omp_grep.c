@@ -86,11 +86,11 @@ int main(int argc, char** argv) {
 
     //////////////////////////////////// PRINT RESULT ////////////////////////////////////
 
-    for(i = 0; i<total_line; i++){
-        if(result_arr[i] == 1){
-            // printf("line : %d\n", i+1);
-        }
-    }
+    // for(i = 0; i<total_line; i++){
+    //     if(result_arr[i] == 1){
+    //         printf("line : %d\n", i+1);
+    //     }
+    // }
     end_time = omp_get_wtime();
 
     //////////////////////////////////// FREE ////////////////////////////////////

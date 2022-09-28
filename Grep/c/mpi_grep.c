@@ -73,17 +73,17 @@ int main(int argc, char** argv) {
     //////////////////////////////////// GET THE FILE SIZE UP TO A SPECIFIC LINE //////////////////////////////////// 
     struct stat sb;
     stat(argv[1], &sb);
-    printf("sb.st_size : %jd\n", (intmax_t)sb.st_size);
+    // printf("sb.st_size : %jd\n", (intmax_t)sb.st_size);
     // long line_size = getSpecificSize(filename, (int)total_line/2);
     size_t line_size, received_line_size;
     if (rank == 0) {
         line_size = getSpecificSize_getline(filename, (int)total_line/2);
         MPI_Send(&line_size, 1, my_MPI_SIZE_T, 1, 0, MPI_COMM_WORLD);
-        printf("line size : %zu\n", line_size);
+        // printf("line size : %zu\n", line_size);
 
     } else {
         MPI_Recv(&received_line_size, 1, my_MPI_SIZE_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("received line size : %zu\n", received_line_size);
+        // printf("received line size : %zu\n", received_line_size);
     }
     getsize_time = MPI_Wtime();
     //////////////////////////////////// READ FILE ////////////////////////////////////
@@ -203,7 +203,8 @@ int main(int argc, char** argv) {
     //////////////////////////////////// FREE ////////////////////////////////////
     free(word);
     free(array_line);
-
+    printf("%d : finish free\n", rank);
+    free_time = MPI_Wtime();
 
     //////////////////////////////////// TIME ////////////////////////////////////
 
@@ -215,7 +216,7 @@ int main(int argc, char** argv) {
         printf("tolower_search = %f seconds\n", search_time-tolower_time);
         printf("search-MPI = %f seconds\n", communicate_time-search_time);
         printf("MPI-end = %f seconds\n", end_time-communicate_time);
-        printf("\nend-free = %f seconds\n", free_time-end_time);
+        printf("end-free = %f seconds\n", free_time-end_time);
     }
     
     MPI_Finalize();

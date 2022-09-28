@@ -279,12 +279,13 @@ size_t getSpecificSize_getline(char *name, int target_line){
 //////////////////////////////////// MAIN ////////////////////////////////////
 
 int main(int argc, char** argv) {
-    double start_time, getsize_time, file_time, tolower_time, hashing_time, end_time, free_time;
-    double migrate_comm_time, communicate_time, after_comm_time;
     MPI_Init( &argc, &argv );
     int rank, size;
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
+
+    double start_time, getsize_time, file_time, tolower_time, hashing_time, end_time, free_time;
+    double migrate_comm_time, communicate_time, after_comm_time;
 
     char filename[256];
     strcpy(filename, argv[1]);
