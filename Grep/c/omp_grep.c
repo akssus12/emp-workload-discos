@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
 
-    double start_time, file_time, tolower_time, search_time, end_time; 
+    double start_time, file_time, tolower_time, search_time, end_time, free_time; 
     char filename[256];
     char target[256];
     int i;
@@ -93,19 +93,24 @@ int main(int argc, char** argv) {
     }
     end_time = omp_get_wtime();
 
-    //////////////////////////////////// TIME ////////////////////////////////////
-    printf("\nTotaltime = %.6f seconds\n", end_time-start_time);
-    printf("\nstart_file = %f seconds\n", file_time-start_time);
-    printf("\nfile-tolower = %.6f seconds\n", tolower_time-file_time);
-    printf("\ntolower-search  = %.6f seconds\n", search_time-tolower_time);
-    printf("\nsearch-end  = %.6f seconds\n", end_time-search_time);
-
     //////////////////////////////////// FREE ////////////////////////////////////
     for(i=0; i<total_line; i++){
         free(free_array[i]);
     }
     free(array_word1);
     free(result_arr);
+    printf("finish free\n");
+    free_time = omp_get_wtime();
+
+    //////////////////////////////////// TIME ////////////////////////////////////
+    printf("\nTotaltime = %.6f seconds\n", free_time-start_time);
+    printf("\nstart_file = %f seconds\n", file_time-start_time);
+    printf("\nfile-tolower = %.6f seconds\n", tolower_time-file_time);
+    printf("\ntolower-search  = %.6f seconds\n", search_time-tolower_time);
+    printf("\nsearch-end  = %.6f seconds\n", end_time-search_time);
+    printf("\nend-free = %f seconds\n", free_time-end_time);
+
+    
 
     return 0;
 }

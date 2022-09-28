@@ -210,14 +210,14 @@ int cmp_count(const void* p1, const void* p2) {
 
 //////////////////////////////////// MAIN ////////////////////////////////////
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
 
     // Used to find the file size
-    struct stat sb;
-    double start_time, file_time, exec_time, tolower_time, hashing_time, migrate_time, qsort_time;
-    char filename[256];
+    static struct stat sb;
+    static double start_time, file_time, exec_time, tolower_time, hashing_time, migrate_time, qsort_time, free_time;
+    static char filename[256];
     strcpy(filename, argv[1]);
     int total_line = atoi(argv[2]);
     int i;
@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
 
     char **array_word1 = (char **)calloc(total_line, sizeof(char *));
 
-    FILE *ptr;
+    static FILE *ptr;
     char *tmp_line = NULL;
     size_t len = 0;
     ssize_t read;
@@ -347,15 +347,6 @@ int main(int argc, char** argv) {
     // }
     exec_time = omp_get_wtime();
 
-    //////////////////////////////////// TIME ////////////////////////////////////
-    printf("total_words : %d\n", hash_table->count);
-    printf("\nTotaltime = %.6f seconds\n", exec_time-start_time);
-    printf("\nstart-file = %.6f seconds\n", file_time-start_time);
-    printf("\nfile-tolower = %.6f seconds\n", tolower_time-file_time);
-    printf("\ntolower-hashing = %.6f seconds\n", hashing_time-tolower_time);
-    printf("\nhashing-migrate = %.6f seconds\n", migrate_time-hashing_time);
-    printf("\nmigrate-qsort = %.6f seconds\n", qsort_time-migrate_time);
-
     //////////////////////////////////// FREE ////////////////////////////////////
     for(i=0; i<total_line; i++){
         free(free_array[i]);
@@ -365,6 +356,19 @@ int main(int argc, char** argv) {
     free(words);
     free(len_words);
     free_htable(hash_table);
+    printf("finish free\n");
+    free_time = omp_get_wtime();
+
+    //////////////////////////////////// TIME ////////////////////////////////////
+    printf("total_words : %d\n", hash_table->count);
+    printf("\nTotaltime = %.6f seconds\n", free_time-start_time);
+    printf("\nstart-file = %.6f seconds\n", file_time-start_time);
+    printf("\nfile-tolower = %.6f seconds\n", tolower_time-file_time);
+    printf("\ntolower-hashing = %.6f seconds\n", hashing_time-tolower_time);
+    printf("\nhashing-migrate = %.6f seconds\n", migrate_time-hashing_time);
+    printf("\nmigrate-qsort = %.6f seconds\n", qsort_time-migrate_time);
+    printf("\nqsort-end = %.6f seconds\n", exec_time-qsort_time);
+    printf("\nend-free = %f seconds\n", free_time-exec_time);
 
     return 0;
 }

@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(2); // Use 2 threads for all consecutive parallel regions
 
-    double start_time, file_time, create_time, agg_time, end_time; 
+    double start_time, file_time, create_time, agg_time, end_time, free_time; 
     char filename[256];
     int total_line;
     int i;
@@ -184,13 +184,6 @@ int main(int argc, char** argv) {
     printf("finish print result\n");
     end_time = omp_get_wtime();
 
-    //////////////////////////////////// TIME ////////////////////////////////////
-    printf("\nTotaltime = %f seconds\n", end_time-start_time);
-    printf("\nstart_file = %f seconds\n", file_time-start_time);
-    printf("\nfile-create = %f seconds\n", create_time-file_time);
-    printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
-    printf("\naggregation-end = %f seconds\n", end_time-agg_time);
-
     //////////////////////////////////// FREE ////////////////////////////////////
     destroy(max);
     free(list_node);
@@ -198,6 +191,17 @@ int main(int argc, char** argv) {
         free(array_word1[i]);
     }
     free(array_word1);
+
+    printf("finish free\n");
+    free_time = omp_get_wtime();
+
+    //////////////////////////////////// TIME ////////////////////////////////////
+    printf("\nTotaltime = %f seconds\n", free_time-start_time);
+    printf("\nstart_file = %f seconds\n", file_time-start_time);
+    printf("\nfile-create = %f seconds\n", create_time-file_time);
+    printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
+    printf("\naggregation-end = %f seconds\n", end_time-agg_time);
+    printf("\nend-free = %f seconds\n", free_time-end_time);
 
     return 0;
 }

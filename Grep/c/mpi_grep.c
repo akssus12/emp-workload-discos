@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Comm_size( MPI_COMM_WORLD, &size );
 
-    double start_time, getsize_time, file_time, tolower_time, search_time, communicate_time, end_time;
+    double start_time, getsize_time, file_time, tolower_time, search_time, communicate_time, end_time, free_time;
     char filename[256];
     char target[256];
 
@@ -200,20 +200,23 @@ int main(int argc, char** argv) {
     
     end_time = MPI_Wtime();
 
+    //////////////////////////////////// FREE ////////////////////////////////////
+    free(word);
+    free(array_line);
+
+
     //////////////////////////////////// TIME ////////////////////////////////////
 
     if (rank == 0){
-        printf("\nTotaltime = %f seconds\n", end_time - start_time);
+        printf("\nTotaltime = %f seconds\n", free_time - start_time);
         printf("start_getsize = %f seconds\n", getsize_time-start_time);
         printf("getsize_file = %f seconds\n", file_time-getsize_time);
         printf("file_tolower = %f seconds\n", tolower_time-file_time);
         printf("tolower_search = %f seconds\n", search_time-tolower_time);
         printf("search-MPI = %f seconds\n", communicate_time-search_time);
         printf("MPI-end = %f seconds\n", end_time-communicate_time);
+        printf("\nend-free = %f seconds\n", free_time-end_time);
     }
-    
-    free(word);
-    free(array_line);
     
     MPI_Finalize();
     return 0;

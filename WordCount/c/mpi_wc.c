@@ -279,7 +279,7 @@ size_t getSpecificSize_getline(char *name, int target_line){
 //////////////////////////////////// MAIN ////////////////////////////////////
 
 int main(int argc, char** argv) {
-    double start_time, getsize_time, file_time, tolower_time, hashing_time, end_time;
+    double start_time, getsize_time, file_time, tolower_time, hashing_time, end_time, free_time;
     double migrate_comm_time, communicate_time, after_comm_time;
     MPI_Init( &argc, &argv );
     int rank, size;
@@ -448,10 +448,20 @@ int main(int argc, char** argv) {
         // }
         end_time = MPI_Wtime();
 
-        //////////////////////////////////// TIME ////////////////////////////////////
+        //////////////////////////////////// FREE ////////////////////////////////////
+        free(final_words);
+        free(receive_words);
+    }
+    free(words);
+    free(word);
+    free_htable(hash_table);
+    printf("finish free\n");
+    free_time = MPI_Wtime();
 
+    if (rank == 0) {
+        //////////////////////////////////// TIME ////////////////////////////////////
         printf(" number of words : %d\n", hash_table->count);
-        printf("\n Totaltime = %.6f seconds\n", end_time-start_time);
+        printf("\n Totaltime = %.6f seconds\n", free_time-start_time);
         printf("\n start-getsize = %.6f seconds\n", getsize_time-start_time);
         printf("\n getsize-file = %.6f seconds\n", file_time-getsize_time);
         printf("\n file-tolower = %.6f seconds\n", tolower_time-file_time);
@@ -460,14 +470,8 @@ int main(int argc, char** argv) {
         printf("\n migrate_comm-communication = %.6f seconds\n", communicate_time-migrate_comm_time);
         printf("\n communication-after_comm = %.6f seconds\n", after_comm_time-communicate_time);
         printf("\n after_comm-end_time = %.6f seconds\n", end_time-after_comm_time);
-
-        //////////////////////////////////// FREE ////////////////////////////////////
-        free(final_words);
-        free(receive_words);
+        printf("\n end-free = %f seconds\n", free_time-end_time);
     }
-    free(words);
-    free(word);
-    free_htable(hash_table);
 
     MPI_Finalize();
     return 0;

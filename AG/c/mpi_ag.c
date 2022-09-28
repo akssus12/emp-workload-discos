@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
     
-    double start_time, getsize_time, file_time, create_time, agg_time, reduce_time, end_time;
+    double start_time, getsize_time, file_time, create_time, agg_time, reduce_time, end_time, free_time;
     char filename[256];
     int key, value;
     int total_line;
@@ -270,15 +270,6 @@ int main(int argc, char** argv) {
 
         printf("finish print result\n");
         end_time = MPI_Wtime();
-
-        //////////////////////////////////// TIME ////////////////////////////////////
-        printf("\nTotaltime = %f seconds\n", end_time-start_time);
-        printf("\nstart_getsize = %f seconds\n", getsize_time-start_time);
-        printf("\ngetsize_file = %f seconds\n", file_time-getsize_time);
-        printf("\nfile-create = %f seconds\n", create_time-file_time);
-        printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
-        printf("\naggregation-reduction = %f seconds\n", reduce_time-agg_time);
-        printf("\nreduction-end = %f seconds\n", end_time-reduce_time);
     }
     
 
@@ -295,6 +286,21 @@ int main(int argc, char** argv) {
     free(num_array);
     free(received_num_array);
     free(received_sum_array);
+
+    printf("finish free\n");
+    free_time = MPI_Wtime();
+
+    if (rank == 0){
+        //////////////////////////////////// TIME ////////////////////////////////////
+        printf("\nTotaltime = %f seconds\n", free_time-start_time);
+        printf("\nstart_getsize = %f seconds\n", getsize_time-start_time);
+        printf("\ngetsize_file = %f seconds\n", file_time-getsize_time);
+        printf("\nfile-create = %f seconds\n", create_time-file_time);
+        printf("\ncreate-aggregation = %f seconds\n", agg_time-create_time);
+        printf("\naggregation-reduction = %f seconds\n", reduce_time-agg_time);
+        printf("\nreduction-end = %f seconds\n", end_time-reduce_time);
+        printf("\nend-free = %f seconds\n", free_time-end_time);
+    }
 
     MPI_Finalize();
     return 0;
