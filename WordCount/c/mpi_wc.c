@@ -447,6 +447,7 @@ int main(int argc, char** argv) {
         //     printf("%s %d\n", final_words[i].word, final_words[i].count);
         // }
         end_time = MPI_Wtime();
+        printf(" number of words : %d\n", hash_table->count);
 
         //////////////////////////////////// FREE ////////////////////////////////////
         free(final_words);
@@ -460,7 +461,6 @@ int main(int argc, char** argv) {
 
     if (rank == 0) {
         //////////////////////////////////// TIME ////////////////////////////////////
-        printf(" number of words : %d\n", hash_table->count);
         printf("\n Totaltime = %.6f seconds\n", free_time-start_time);
         printf("\n start-getsize = %.6f seconds\n", getsize_time-start_time);
         printf("\n getsize-file = %.6f seconds\n", file_time-getsize_time);
