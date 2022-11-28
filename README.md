@@ -1,46 +1,91 @@
 # emp-workload-discos
-Evaluation of cyclomatic complexity between EMP and distributed computing
+This project is Evaluation of cyclomatic complexity(CCN) between EMP and distributed computing. We use Cyclomatic Complexity Analyzer, [Lizard](https://github.com/terryyin/lizard) to get CCN. Three simple big data applications are used to compare CCN. 
 
-# JAVA_PR | How to complile
-javac -cp $MPJ_HOME/lib/mpj.jar MPIPagerankEMP.java
+- **Grep**
 
-# JAVA_PR | How to execute
-$MPJ_HOME/bin/mpjrun.sh -np 4 MPIPageRank pagerank.500k 100 0.85
-pagerank.500k -> inputFile for pagerank
-100 - number of iterations
-0.85 - pagerank value for dampling factor
+    Grep is a string matching application that prints lines containing a matching keyword from the input file.
 
-# C_WC | How to compile
-cd WordCount/c
-make -> wc, mpi_wc
+- **GAG(Group By Aggregation)**
 
-# C_WC | How to execute
-dataset : [Amazon reviews](https://www.kaggle.com/datasets/bittlingmayer/amazonreviews)
+    GAG is an application that generates statistics based on key values of <key, value> pairs.
 
-Mode : serial
-./wc [dataset]
+- **AG(Aggregation)**
+    
+    AG is an application that operates in a similar way to GAG, but has the same key value.
 
-Mode : MPI
-mpirun -np [#core] [--hostfile own_hostfile] mpi_wc [dataset]
-* When using a remote machine, the dataset & code must be in the same location.
+  
+Each application is implemented in three versions.
+- **[workload].out** runs with single thread in single machine.
+- **mpi_[workload].out** runs in one thread on each of the two machines using Open MPI(v4.1.1).
+- **omp_[workload].out** runs with two threads in single machine using OpenMP(v4.5).
 
-# C_PR | How to compile
-cd Pagerank/c
-make -> mpi_pr
-make trim -> datatrim
-make serial -> pr
+---
+# How to compile
+- **Grep**
+    ```bash
+    $ cd Grep/c
+    $ make
+    ```
+ - **GAG**
+    ```bash
+    $ cd GAG/c
+    $ make
+    ```   
 
-# C_PR | How to execute
-dataset : [Livejournal social network](http://snap.stanford.edu/data/soc-LiveJournal1.html)
+- **AG**
+    ```bash
+    $ cd AG/c
+    $ make
+    ```
+---
+# How to run
+MPI and OMP version use a shell script to execute. When running the MPI version, it should create a hostfile called ***my_hostfile***
+- **Grep**
+    - grep.out
+        ```bash
+        $ grep.out [file] [target word] 
+        ```
+    - mpi_grep.out
+        ```bash
+        $ running_mpi_grep.sh [file] [target word] 
+        ```
+    - omp_grep.out
+        ```bash
+        $ running_omp_grep.sh [file] [target word] 
+        ```
 
-datatrim fetch the subset of the original data.
-Outputs
-    data_input_meta : first line indicating the number of the nodes, the following lines indicating the node index, number of incoming links, number of outgoing links.
+<br/>
 
-    data_input_link : the directed links (source node -> destination node )
+- **GAG**
+    - gag.out
+        ```bash
+        $ gag.out [file] 
+        ```
+    - mpi_gag.out
+        ```bash
+        $ running_mpi_gag.sh [file] 
+        ```
+    - omp_gag.out
+        ```bash
+        $ running_omp_grep.sh [file] 
+        ```
 
-Mode : serial
-./pr
+<br/>
 
-Mode : MPI
-./mpi_pr
+- **AG**
+    - ag.out
+        ```bash
+        $ ag.out [file]
+        ```
+    - mpi_ag.out
+        ```bash
+        $ running_mpi_ag.sh [file]
+        ```
+    - omp_ag.out
+        ```bash
+        $ running_omp_ag.sh [file]
+        ```
+---
+# Constructing Dataset
+When running GAG and AG applicaiton, you can construct dataset using our dataset generator. generator is simple python code that create dataset based on specified the maximum key value and the number of data in python code. generator is located in the AG, GAG workload path.<br/>
+The Grep application can use any text file. 

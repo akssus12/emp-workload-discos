@@ -1,10 +1,9 @@
 #! /bin/bash
 
-# $1 : number of using cores
-# $2 : target file neme
+# $1 : target file neme
 # line : lines of target file
 
-line=$(wc -l < $2)
+line=$(wc -l < $1)
 echo "${line}"
 
-mpirun -np $1 -hostfile ./my_hostfile ./mpi_ag $2 $line
+mpirun -np 2 -hostfile ./my_hostfile ./mpi_ag $2 $line
